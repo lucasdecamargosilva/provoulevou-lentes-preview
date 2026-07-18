@@ -15,11 +15,14 @@
      4  poli astigmatismo   -5,00 a +5,00     até 4,00     poli p/ astig.
      5  finas               -8,00 a +6,00     até 2,00     resina 1.67
      6  super finas        -12,00 a +6,00     até 2,00     resina 1.74
+     7  multifocal          -4,00 a +4,00     até 4,00     multifocal 1.49
+
+   A faixa 7 so vale para visao 'multifocal'; as outras, para 'simples'.
 
    ATENÇÃO: as faixas 5 e 6 são ASSIMÉTRICAS (vão mais fundo no negativo que
    no positivo), por isso o limite é com sinal — não dá para usar módulo.
 
-   Fora de todas, multifocal, ou tratamento que não existe na faixa:
+   Fora de todas, ou tratamento que não existe na faixa:
    não indicamos. A ótica monta sob medida e chama no WhatsApp.
    Melhor não vender do que vender errado.
 
@@ -96,6 +99,7 @@ const LENTES = [
 const FAIXAS = [
   {
     nome: 'padrão', material: 'resina 1.56',
+    visao: 'simples',
     esfMin: -4.00, esfMax: 4.00, cilMax: 2.00,
     lentes: {
       antirreflexo:       '316444407',  // Básicas 1.56 c/ AR                R$ 129
@@ -106,6 +110,7 @@ const FAIXAS = [
   },
   {
     nome: 'astigmatismo', material: 'resina para astigmatismo',
+    visao: 'simples',
     esfMin: -4.00, esfMax: 4.00, cilMax: 4.00,
     lentes: {
       antirreflexo:       '337827069',  // AR Para Astigmatismo              R$ 199
@@ -114,6 +119,7 @@ const FAIXAS = [
   },
   {
     nome: 'policarbonato', material: 'policarbonato 1.59',
+    visao: 'simples',
     esfMin: -5.00, esfMax: 5.00, cilMax: 2.00,
     lentes: {
       antirreflexo:       '314902090',  // Poli 1.59 c/ AR                   R$ 229
@@ -123,6 +129,7 @@ const FAIXAS = [
   },
   {
     nome: 'policarbonato astigmatismo', material: 'policarbonato para astigmatismo',
+    visao: 'simples',
     esfMin: -5.00, esfMax: 5.00, cilMax: 4.00,
     lentes: {
       antirreflexo: '339012891',  // Poli c/ AR Para Astigmatismo            R$ 379
@@ -131,6 +138,7 @@ const FAIXAS = [
   },
   {
     nome: 'finas', material: 'resina 1.67',
+    visao: 'simples',
     esfMin: -8.00, esfMax: 6.00, cilMax: 2.00,
     lentes: {
       antirreflexo: '314902033',  // Finas 1.67 c/ AR                        R$ 499
@@ -139,10 +147,22 @@ const FAIXAS = [
   },
   {
     nome: 'super finas', material: 'resina 1.74',
+    visao: 'simples',
     esfMin: -12.00, esfMax: 6.00, cilMax: 2.00,
     lentes: {
       antirreflexo: '314902042',  // Super Finas 1.74 c/ AR                  R$ 999
       blue:         '314902045',  // Super Finas 1.74 AR + Anti Blue         R$ 1399
+    }
+  },
+  {
+    nome: 'multifocal', material: 'multifocal 1.49',
+    visao: 'multifocal',
+    esfMin: -4.00, esfMax: 4.00, cilMax: 4.00,
+    lentes: {
+      antirreflexo: '314902058',  // Multifocais c/ Antirreflexo            R$ 429
+      blue:         '314902067',  // Multifocais AR + Filtro de Luz Azul    R$ 599
+      // fotocromática multifocal nao existe no catalogo
+      // a Basica 1.49 (R$ 359) fica de fora: nao tem antirreflexo
     }
   },
 ];
@@ -164,7 +184,8 @@ function grau(receita) {
   };
 }
 
-const cabe = (g, f) => g.esf >= f.esfMin && g.esf <= f.esfMax && g.cil <= f.cilMax;
+const cabe = (g, f, visao) =>
+  f.visao === visao && g.esf >= f.esfMin && g.esf <= f.esfMax && g.cil <= f.cilMax;
 
 /**
  * @param {{visao:string, trat:string, receita:object|null}} e
@@ -172,17 +193,17 @@ const cabe = (g, f) => g.esf >= f.esfMin && g.esf <= f.esfMax && g.cil <= f.cilM
  *        | {fora:'multifocal'|'esferico'|'cilindrico'|'tratamento'}  → ótica
  */
 function recomendar(e) {
-  // As regras cobrem monofocal. Multifocal ainda não tem faixa definida.
-  if (e.visao === 'multifocal') return { fora: 'multifocal' };
-
+  // "Sem grau" (descanso) usa as faixas de monofocal.
+  const visao = e.visao === 'descanso' ? 'simples' : e.visao;
   const g = grau(e.receita);
 
-  // Primeira faixa que couber no esférico E no cilíndrico.
-  const faixa = FAIXAS.find(f => cabe(g, f));
+  // Primeira faixa da mesma visao que couber no esférico E no cilíndrico.
+  const doTipo = FAIXAS.filter(f => f.visao === visao);
+  const faixa = doTipo.find(f => cabe(g, f, visao));
   if (!faixa) {
     // Explica qual dos dois estourou: se alguma faixa aceita esse esférico,
     // então quem está fora é o cilíndrico.
-    const esfOk = FAIXAS.some(f => g.esf >= f.esfMin && g.esf <= f.esfMax);
+    const esfOk = doTipo.some(f => g.esf >= f.esfMin && g.esf <= f.esfMax);
     return esfOk ? { fora: 'cilindrico', valor: g.cil }
                  : { fora: 'esferico', valor: g.esf };
   }

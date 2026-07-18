@@ -1,0 +1,889 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Provou Levou — fluxo Escolher Lentes (preview)</title>
+<link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/bold/style.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/fill/style.css" rel="stylesheet">
+
+<div id="palco">
+  <div class="aviso">
+    <b>Preview integrado</b> &mdash; CSS e HTML reais do provador da Maxilook.
+    O fluxo de lentes est&aacute; embutido como novas telas do pr&oacute;prio provador.
+    A leitura da receita &eacute; <b>real</b> (Gemini). Nada &eacute; enviado &agrave; loja.
+  </div>
+  <div class="fone"><div class="fone-tela">
+
+        <div id="q-modal-ia">
+            <div class="q-card-ia">
+                <button type="button" class="q-close-ia" id="q-close-btn">&times;</button>
+                <div class="q-content-scroll">
+
+                    <!-- Persistent header (all steps) -->
+                    <div id="q-header-provador">
+                        <h1>Provador Virtual</h1>
+                        <img src="https://i.ibb.co/nXsrsNP/maxilook-logo.webp" alt="MAXILOOK" style="height:34px;width:auto;"/>
+                    </div>
+
+                    <!-- Main step -->
+                    <div id="q-step-photo">
+                        <!-- WhatsApp -->
+                        <div class="q-phone-wrap">
+                            <span class="q-field-label">Seu WhatsApp<span class="q-required-mark">*</span></span>
+                            <input type="tel" id="q-phone" class="q-input" placeholder="(11) 99999-9999" maxlength="15">
+                            <div id="q-phone-error" class="q-status-msg">N&#250;mero inv&#225;lido</div>
+                            <div id="q-provas-restantes" class="q-provas-msg"></div>
+                        </div>
+
+                        <!-- Photo section -->
+                        <p class="q-section-label">Envie sua foto</p>
+                        <div class="q-tip-box">
+                            <i class="ph ph-lightbulb"></i>
+                            <span>Use uma foto n&#237;tida, de frente, com boa ilumina&#231;&#227;o.</span>
+                        </div>
+
+                        <!-- Face frame -->
+                        <div class="q-face-frame" id="q-face-frame">
+                            <div class="q-face-corner q-face-corner-tl"></div>
+                            <div class="q-face-corner q-face-corner-tr"></div>
+                            <div class="q-face-corner q-face-corner-bl"></div>
+                            <div class="q-face-corner q-face-corner-br"></div>
+                            <img id="q-pre-img" alt="Sua foto">
+                            <div class="q-face-placeholder" id="q-face-placeholder">
+                                <i class="ph ph-user-circle" style="font-size:80px;color:#d4d4d4;"></i>
+                            </div>
+                        </div>
+
+                        <!-- Upload buttons -->
+                        <div class="q-upload-btns">
+                            <button class="q-upload-btn" id="q-btn-camera">
+                                <i class="ph ph-camera"></i> Tirar foto
+                            </button>
+                            <button class="q-upload-btn" id="q-btn-gallery">
+                                <i class="ph ph-image"></i> Da galeria
+                            </button>
+                            <input type="file" id="q-camera-input" accept="image/*" capture="user" style="display:none">
+                            <input type="file" id="q-gallery-input" accept="image/*" style="display:none">
+                        </div>
+
+                        <!-- Terms -->
+                        <label class="q-terms-row">
+                            <input type="checkbox" id="q-accept-terms">
+                            <span>Concordo com os <a href="http://provoulevou.com.br/termos.html" target="_blank">Termos e Condi&#231;&#245;es</a></span>
+                        </label>
+
+                        <div id="q-validation-hint" class="q-validation-hint"></div>
+                        <button class="q-btn-black" id="q-btn-generate">Provar &#243;culos</button>
+                    </div>
+
+                    <!-- PIX -->
+                    <div id="q-step-pix">
+                        <h2>Prova Extra</h2>
+                        <p class="q-pix-subtitle">Limite de 3 provas atingido.<br>Pague R$1 via PIX para mais uma:</p>
+                        <p style="font-size: 11px; color: var(--c-muted); margin: 8px 0 0; line-height: 1.5; text-align: center;">&#8505;&#65039; Cobran&#231;a feita pela Provou Levou, n&#227;o pela loja</p>
+                        <div class="q-pix-qr"><img id="q-pix-qr-img" alt="QR Code PIX"></div>
+                        <div class="q-pix-copiacola">
+                            <input type="text" id="q-pix-code" readonly placeholder="C&#243;digo PIX...">
+                            <button id="q-pix-copy-btn">Copiar</button>
+                        </div>
+                        <div id="q-pix-status-msg" class="q-pix-status q-pix-waiting">Aguardando pagamento...</div>
+                        <p class="q-pix-cancel" id="q-pix-cancel">Cancelar</p>
+                    </div>
+
+                    <!-- Loading -->
+                    <div id="q-loading-box">
+                        <div class="q-loading-texts">
+                            <div class="q-loading-t1">Gerando sua prova...</div>
+                            <a href="https://provoulevou.com.br?utm_source=widget&utm_medium=lojista&utm_campaign=maxilook" target="_blank" class="q-loading-t2">
+                                <span>Powered by</span>
+                                <img src="https://i.ibb.co/MD3B4FQf/Logo-provou-preto-1.png" alt="Provou Levou">
+                            </a>
+                        </div>
+                        <div class="q-loading-bar"><div></div></div>
+                    </div>
+
+                    <!-- Resultado -->
+                    <div id="q-step-result">
+                        <span class="q-res-title">Veja como ficou em voc&ecirc;</span>
+                        <div id="q-result-img-col">
+                            <img id="q-final-view-img">
+                        </div>
+                        <div id="q-result-actions-col">
+                            <div class="q-fakebuy" id="q-fakebuy"></div>
+                            <div class="q-result-prodinfo" id="q-result-prodinfo" style="display:none;">
+                                <div class="q-result-prodname" id="q-result-prodname"></div>
+                                <div class="q-result-prodprice" id="q-result-prodprice"></div>
+                                <div class="q-result-installment" id="q-result-installment"></div>
+                                <div class="q-scarcity" id="q-scarcity" style="display:none;"><i class="ph-bold ph-fire"></i> APENAS <strong id="q-scarcity-n"></strong>&nbsp;UNIDADES RESTANTES</div>
+                            </div>
+                            <div class="q-seals" id="q-seals" style="display:none;">
+                                <div class="q-seal"><i class="ph-fill ph-shield-check"></i><span>Compra<br>Segura</span></div>
+                                <div class="q-seal"><i class="ph-fill ph-lock-key"></i><span>Pagamento<br>Seguro</span></div>
+                            </div>
+                            <button class="q-btn-buy-now" id="q-btn-buy-now">COMPRAR ARMA&Ccedil;&Atilde;O
+    <span class="q-btn-sub">R$ 274,00</span></button>
+<button class="q-btn-outline" id="q-btn-escolher-lentes" style="margin-top:9px;">ESCOLHER LENTES
+    <span class="q-btn-sub">a partir de R$ 129 &middot; monte seu &oacute;culos completo</span></button>
+                            <div id="q-related-products" style="display:none;">
+                                <h4>Veja tamb&eacute;m</h4>
+                                <div class="q-related-grid" id="q-related-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Erro -->
+                    <div id="q-step-error">
+                        <h2>ALTA DEMANDA</h2>
+                        <p>Aguarde alguns segundos para tentar novamente.</p>
+                        <button class="q-btn-outline" id="q-error-back">Voltar ao Produto</button>
+                        <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08);"><p style="font-size:12px;color:var(--c-muted);margin:0 0 8px;">Continua com problema? Fale direto com a Provou Levou:</p><a href="https://wa.me/5511938034714?text=Ol%C3%A1!%20Tive%20um%20problema%20ao%20usar%20o%20provador." target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:7px;background:#25D366;color:#fff;border-radius:10px;padding:10px 18px;font-family:inherit;font-weight:700;font-size:13px;text-decoration:none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.9c0 2.1.55 4.06 1.6 5.8L2 22l4.44-1.65a9.9 9.9 0 0 0 5.6 1.72h.01c5.46 0 9.9-4.45 9.9-9.9C21.95 6.45 17.5 2 12.04 2zm5.8 14.15c-.24.68-1.4 1.3-1.94 1.34-.5.05-1.13.07-1.82-.11-.42-.13-.96-.31-1.65-.61-2.9-1.25-4.8-4.17-4.94-4.36-.15-.19-1.18-1.57-1.18-2.99 0-1.42.75-2.12 1.01-2.41.27-.29.58-.36.77-.36l.55.01c.18.01.42-.07.66.5.24.59.83 2.04.9 2.18.07.15.12.32.02.51-.1.19-.15.31-.29.48-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.75 1.24 1.62 2.01 1.11.99 2.05 1.3 2.34 1.44.29.15.46.12.63-.07.17-.19.72-.84.91-1.13.19-.29.39-.24.66-.14.27.1 1.7.8 1.99.95.29.15.48.22.55.34.07.12.07.71-.17 1.39z"/></svg> Falar com a Provou Levou</a></div>
+                    </div>
+
+                
+<!-- ============ ESCOLHER LENTES ============ -->
+<div id="q-step-lentes">
+    <div class="q-passos"><i class="on"></i><i></i><i></i><i></i></div>
+    <span class="q-section-label">Que tipo de lente voc&ecirc; usa?</span>
+    <button class="q-opt" data-visao="simples">
+        <span class="q-opt-t">Vis&atilde;o simples</span>
+        <span class="q-opt-s">Para perto <b>ou</b> para longe</span></button>
+    <button class="q-opt" data-visao="multifocal">
+        <span class="q-opt-t">Multifocal</span>
+        <span class="q-opt-s">Para perto <b>e</b> para longe</span></button>
+    <button class="q-opt" data-visao="descanso">
+        <span class="q-opt-t">Sem grau</span>
+        <span class="q-opt-s">S&oacute; quero o tratamento (descanso)</span></button>
+    <a class="q-sair" data-carrinho="sem">prefiro s&oacute; a arma&ccedil;&atilde;o</a>
+</div>
+
+<div id="q-step-receita">
+    <div class="q-passos"><i class="done"></i><i class="on"></i><i></i><i></i></div>
+    <span class="q-section-label">Qual tratamento voc&ecirc; quer?</span>
+    <button class="q-opt" data-trat="antirreflexo">
+        <span class="q-opt-t">Antirreflexo</span>
+        <span class="q-opt-s">O essencial, para o dia a dia</span></button>
+    <button class="q-opt" data-trat="blue">
+        <span class="q-opt-t">Antirreflexo + Filtro de luz azul</span>
+        <span class="q-opt-s">Para quem passa o dia em telas</span></button>
+    <button class="q-opt" data-trat="fotocromatica">
+        <span class="q-opt-t">Fotocrom&aacute;tica</span>
+        <span class="q-opt-s">Escurece no sol, clareia dentro de casa</span></button>
+    <a class="q-voltar" data-ir="q-step-lentes">voltar</a>
+    <a class="q-sair" data-carrinho="sem">prefiro s&oacute; a arma&ccedil;&atilde;o</a>
+</div>
+
+<div id="q-step-upload">
+    <div class="q-passos"><i class="done"></i><i class="done"></i><i class="on"></i><i></i></div>
+    <span class="q-section-label">Agora, sua receita</span>
+    <div class="q-tip-box" style="margin-bottom:16px;">
+        <i class="ph ph-lightbulb"></i>
+        <span>Precisamos do seu grau para indicar a lente certa.</span>
+    </div>
+    <input type="file" id="q-arquivo" accept="image/*,application/pdf" hidden>
+    <button class="q-opt q-opt-destaque" id="q-abrir-arquivo">
+        <span class="q-opt-t">&#128196; Enviar minha receita</span>
+        <span class="q-opt-s">Tire uma foto ou anexe o arquivo &mdash; a gente l&ecirc; pra voc&ecirc;</span></button>
+    <button class="q-opt" data-receita="digitar">
+        <span class="q-opt-t">&#9000; Digitar os dados</span>
+        <span class="q-opt-s">Prefiro preencher os campos eu mesma</span></button>
+
+    <div id="q-lendo" class="q-lendo" hidden>
+        <img id="q-thumb" alt="" hidden>
+        <div class="q-lendo-arq" id="q-arq-nome"></div>
+        <div class="q-spin"></div>
+        <div>Lendo sua receita&hellip;</div>
+    </div>
+    <div id="q-erro-leitura" class="q-erro-leitura" hidden></div>
+
+    <a class="q-voltar" data-ir="q-step-receita">voltar</a>
+    <a class="q-sair" data-carrinho="sem">prefiro s&oacute; a arma&ccedil;&atilde;o</a>
+</div>
+
+<div id="q-step-lente-final">
+    <div class="q-passos"><i class="done"></i><i class="done"></i><i class="done"></i><i class="on"></i></div>
+    <span class="q-section-label" id="q-lente-titulo">Sua receita</span>
+
+    <div id="q-banner-ia" class="q-banner-ia" hidden></div>
+
+    <div id="q-form-receita">
+        <div class="q-olho"><span class="q-olho-tag">Olho direito (OD)</span>
+            <div class="q-olho-campos">
+                <label>Esf&eacute;rico<select data-r="odEsf"></select></label>
+                <label>Cil&iacute;ndrico<select data-r="odCil"></select></label>
+                <label>Eixo<select data-r="odEixo"></select></label>
+            </div></div>
+        <div class="q-olho"><span class="q-olho-tag">Olho esquerdo (OE)</span>
+            <div class="q-olho-campos">
+                <label>Esf&eacute;rico<select data-r="oeEsf"></select></label>
+                <label>Cil&iacute;ndrico<select data-r="oeCil"></select></label>
+                <label>Eixo<select data-r="oeEixo"></select></label>
+            </div></div>
+        <button class="q-btn-black" id="q-ver-lente" style="margin-top:6px;">VER MINHA LENTE</button>
+    </div>
+
+    <div id="q-resultado-lente" hidden>
+        <div id="q-card-lente" class="q-card-lente"></div>
+        <div id="q-alternativas"></div>
+        <div id="q-resumo-lente" class="q-resumo"></div>
+        <button class="q-btn-black" id="q-add-lente">ADICIONAR AO CARRINHO</button>
+    </div>
+
+    <a class="q-voltar" data-ir="q-step-upload">voltar</a>
+    <a class="q-sair" data-carrinho="sem">prefiro s&oacute; a arma&ccedil;&atilde;o</a>
+</div>
+
+<!-- carrinho simulado -->
+<div id="q-step-cart" style="display:none;flex-direction:column;padding:30px 28px;text-align:center;">
+    <div style="font-size:38px;color:#10b981;margin-bottom:6px;">&#10003;</div>
+    <span class="q-section-label">Adicionado ao carrinho</span>
+    <div id="q-cart-itens" style="text-align:left;margin:14px 0 0;"></div>
+    <div style="display:flex;justify-content:space-between;padding:13px 0;font-size:15px;
+                border-top:1px solid var(--c-line);margin-top:10px;">
+        <span>Total</span><strong id="q-cart-total"></strong></div>
+    <div class="q-tip-box" style="margin-top:12px;">
+        <i class="ph ph-lightbulb"></i><span>Preview &mdash; nada foi enviado &agrave; loja.</span></div>
+    <a class="q-voltar" data-ir="q-step-result">voltar ao in&iacute;cio</a>
+</div>
+</div>
+                <a href="https://provoulevou.com.br?utm_source=widget&utm_medium=lojista&utm_campaign=maxilook" target="_blank" class="q-powered-footer">
+                    <span>Powered by</span>
+                    <img src="https://i.ibb.co/MD3B4FQf/Logo-provou-preto-1.png" class="q-quantic-logo" alt="Provou Levou">
+                </a>
+            </div>
+        </div>
+    
+  </div></div>
+</div>
+
+<style>
+body{margin:0;background:#0f0f11;font-family:'Inter',system-ui,sans-serif}
+#palco{display:flex;flex-direction:column;align-items:center;gap:16px;padding:26px 16px 40px;min-height:100vh}
+.aviso{max-width:430px;background:#16161a;border:1px solid #2a2a32;border-radius:11px;
+       padding:12px 15px;font-size:11.5px;line-height:1.6;color:#9a9aa4}
+.aviso b{color:#fff}
+.fone{width:400px;height:810px;background:#000;border-radius:44px;padding:9px;
+      box-shadow:0 30px 90px rgba(0,0,0,.6);flex-shrink:0}
+.fone-tela{background:#fff;height:100%;border-radius:36px;overflow:hidden;position:relative}
+/* o modal do provador ocupa a tela do "celular" */
+#q-modal-ia{position:absolute!important;inset:0!important;display:flex!important;
+            background:#fff!important;padding:0!important}
+.q-card-ia{width:100%!important;max-width:none!important;height:100%!important;
+           border-radius:0!important;box-shadow:none!important;margin:0!important}
+
+        /* ── Fontes ── */
+
+        :root {
+            --c-bg: #ffffff;
+            --c-surface: #fff0f6;
+            --c-ink: #1a1a1a;
+            --c-muted: #999;
+            --c-line: #f5c6e0;
+            --c-accent: #111111;
+            --c-danger: #cc3333;
+            --font-display: inherit;
+            --font-body: inherit;
+        }
+
+        /* ── Trigger (selo sobre foto) ── */
+        @keyframes q-shake { 0%,50%,100%{transform:rotate(0deg)} 10%,30%{transform:rotate(-10deg)} 20%,40%{transform:rotate(10deg)} }
+        .q-btn-trigger-ia {
+            position: absolute; top: 14px; right: 14px; z-index: 100;
+            background: none; border: none; padding: 0; cursor: pointer;
+            width: 70px; height: 70px;
+            display: flex; align-items: center; justify-content: center;
+            filter: drop-shadow(0 3px 10px rgba(0,0,0,0.22));
+            animation: q-shake 3s infinite;
+            transition: filter 0.2s;
+        }
+        .q-btn-trigger-ia:hover { filter: drop-shadow(0 6px 18px rgba(0,0,0,0.32)); }
+        .q-btn-trigger-ia img { width: 100%; height: 100%; object-fit: contain; }
+        @media (min-width: 768px) { .q-btn-trigger-ia { width: 70px; height: 70px; } }
+
+        /* ── Inline button ── */
+        .q-btn-inline-provador {
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            width: 100%; padding: 13px 16px;
+            background: transparent; color: var(--c-ink);
+            border: 1.5px solid #e0186c; border-radius: 0;
+            font-family: 'Work Sans', var(--font-body), sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+            cursor: pointer; transition: background 0.25s, color 0.25s;
+            margin-bottom: 10px; box-sizing: border-box;
+        }
+        .q-btn-inline-provador:hover { background: #e0186c; color: #fff; }
+        .q-btn-inline-provador svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+        /* ── Modal overlay ── */
+        @keyframes q-modal-in { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+        #q-modal-ia {
+            display: none; position: fixed; inset: 0; z-index: 999999;
+            background: rgba(255,240,248,0.97);
+            font-family: var(--font-body);
+            overflow-y: auto; box-sizing: border-box;
+        }
+        #q-modal-ia * { box-sizing: border-box; }
+
+        /* ── Card ── */
+        .q-card-ia {
+            width: 100%; min-height: 100vh;
+            background: var(--c-bg); color: var(--c-ink);
+            display: flex; flex-direction: column; position: relative;
+            animation: q-modal-in 0.35s cubic-bezier(0.22,1,0.36,1);
+        }
+        @media (min-width: 768px) {
+            #q-modal-ia { display: none; align-items: center; justify-content: center; }
+            .q-card-ia {
+                width: 440px; max-width: 92vw; min-height: auto;
+                max-height: 96vh; border: none;
+                box-shadow: 0 32px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06);
+                overflow: hidden;
+            }
+        }
+
+        /* ── Close ── */
+        .q-close-ia {
+            position: absolute; top: 18px; right: 18px;
+            background: none; border: none;
+            font-size: 20px; font-weight: 300; color: var(--c-muted);
+            cursor: pointer; z-index: 10; line-height: 1; padding: 4px 6px;
+            transition: color 0.2s;
+        }
+        .q-close-ia:hover { color: var(--c-ink); }
+
+        /* ── Content scroll ── */
+        .q-content-scroll {
+            flex: 1; padding: 0; overflow-y: auto;
+            text-align: left; display: flex; flex-direction: column;
+        }
+        .q-content-scroll::-webkit-scrollbar { width: 3px; }
+        .q-content-scroll::-webkit-scrollbar-thumb { background: var(--c-line); }
+
+        @media (max-width: 767px) {
+            #q-modal-ia { display:none; overflow-y:auto; align-items:flex-start; justify-content:center; }
+            #q-modal-ia[style*="flex"] { display:flex !important; }
+            .q-card-ia { width:100%; border:none; margin:0; min-height:100svh; }
+            .q-content-scroll { flex: 1; }
+        }
+
+        /* ── Header strip ── */
+        #q-header-provador {
+            padding: 28px 28px 0;
+            display: flex; flex-direction: column; align-items: center;
+            text-align: center; gap: 10px;
+            border-bottom: 1px solid #f5c6e0;
+            padding-bottom: 22px; margin-bottom: 0;
+        }
+        #q-header-provador h1 {
+            margin: 0;
+            font-family: var(--font-display);
+            font-size: 22px; letter-spacing: 4px;
+            color: var(--c-ink); text-transform: uppercase;
+            font-weight: 400; line-height: 1;
+        }
+
+        /* ── Main step ── */
+        #q-step-photo {
+            display: flex; flex-direction: column; padding: 28px 28px 32px;
+            gap: 0; align-items: stretch;
+        }
+
+        /* ── Labels & inputs ── */
+        .q-field-label {
+            display: block; font-size: 10px; font-weight: 600;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: var(--c-muted); margin-bottom: 8px;
+        }
+        .q-phone-wrap { margin-bottom: 28px; }
+        .q-input {
+            display: block; width: 100%; height: 52px;
+            padding: 0 16px; margin: 0;
+            background: var(--c-surface); border: 1.5px solid transparent;
+            border: 1.5px solid var(--c-line); border-radius: 14px;
+            font-size: 16px; font-family: var(--font-body); font-weight: 400;
+            color: var(--c-ink); outline: none;
+            -webkit-appearance: none; appearance: none; transition: border-color 0.2s;
+        }
+        .q-input:focus { border-color: #e0186c; background: #fff; }
+        .q-input::placeholder { color: #bbb; }
+
+        .q-provas-msg:empty { display: none; }
+        .q-provas-msg {
+            font-size: 13px; margin-top: 10px; letter-spacing: 0.3px;
+            color: var(--c-ink); font-weight: 500;
+            background: var(--c-surface);
+            border: 1px solid var(--c-line);
+            border-radius: 6px;
+            padding: 10px 14px;
+            text-align: center;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .q-provas-msg.is-warn {
+            color: var(--c-danger);
+            background: rgba(204,51,51,0.08);
+            border-color: rgba(204,51,51,0.3);
+            font-weight: 600;
+        }
+
+        .q-status-msg {
+            display: none; font-size: 11px; color: var(--c-danger);
+            font-weight: 500; margin-top: 6px; letter-spacing: 0.3px;
+        }
+
+        /* ── Section label ── */
+        .q-section-label {
+            font-family: var(--font-display);
+            font-size: 16px; letter-spacing: 3px; text-transform: uppercase;
+            color: var(--c-ink); margin: 0 0 14px; font-weight: 400;
+            text-align: center;
+        }
+
+        /* ── Tip ── */
+        .q-tip-box {
+            display: flex; align-items: center; gap: 9px;
+            background: var(--c-surface);
+            padding: 11px 14px; margin-bottom: 20px;
+            font-size: 11.5px; color: var(--c-muted); line-height: 1.45;
+            border-radius: 6px;
+        }
+        .q-tip-box i { color: var(--c-ink); font-size: 15px; flex-shrink: 0; }
+        /* ── Required field marker + shake feedback ── */
+        .q-required-mark { color: var(--c-danger); font-weight: 700; margin-left: 4px; }
+        @keyframes q-shake-x {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+            20%, 40%, 60%, 80% { transform: translateX(6px); }
+        }
+        .q-shake { animation: q-shake-x 0.5s cubic-bezier(.36,.07,.19,.97); }
+        .q-input.is-error {
+            border-color: var(--c-danger) !important;
+            background: rgba(204,51,51,0.06) !important;
+            box-shadow: 0 0 0 3px rgba(204,51,51,0.15);
+        }
+        .q-face-frame.is-error {
+            outline: 3px solid var(--c-danger);
+            outline-offset: 2px;
+            background: rgba(204,51,51,0.06);
+        }
+        .q-validation-hint {
+            display: none;
+            background: var(--c-danger);
+            color: #fff;
+            font-size: 13px; font-weight: 600;
+            letter-spacing: 0.3px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(204,51,51,0.25);
+            animation: q-pop-in 0.25s ease;
+        }
+        .q-validation-hint.is-visible { display: block; }
+        @keyframes q-pop-in {
+            0% { opacity: 0; transform: translateY(-6px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+
+        /* ── Face frame ── */
+        @keyframes q-frame-pulse { 0%,100%{opacity:0.3} 50%{opacity:0.7} }
+        .q-face-frame {
+            position: relative; width: 200px; height: 260px;
+            margin: 0 auto 24px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; background: var(--c-surface);
+            border-radius: 4px;
+            transition: transform 0.2s;
+        }
+        .q-face-frame:hover { transform: scale(1.015); }
+        .q-face-frame img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .q-face-placeholder { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .q-face-placeholder i { font-size: 72px; color: #d0d0d0; }
+        /* Corner marks — clean editorial style */
+        .q-face-corner {
+            position: absolute; width: 20px; height: 20px;
+            border-color: #e0186c; border-style: solid;
+            transition: border-color 0.2s;
+        }
+        .q-face-corner-tl { top: 0; left: 0; border-width: 2px 0 0 2px; }
+        .q-face-corner-tr { top: 0; right: 0; border-width: 2px 2px 0 0; }
+        .q-face-corner-bl { bottom: 0; left: 0; border-width: 0 0 2px 2px; }
+        .q-face-corner-br { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+
+        /* ── Upload buttons ── */
+        .q-upload-btns {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 8px; width: 100%; margin-bottom: 24px;
+        }
+        .q-upload-btn {
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            padding: 12px 8px;
+            border: 1.5px solid var(--c-line);
+            background: transparent; color: var(--c-ink);
+            font-family: var(--font-body); font-size: 12px; font-weight: 500;
+            cursor: pointer; transition: border-color 0.2s, background 0.2s; border-radius: 14px;
+        }
+        .q-upload-btn:hover { border-color: #e0186c; color: #e0186c; background: #fff0f6; }
+        .q-upload-btn i { font-size: 16px; }
+
+        /* ── Terms ── */
+        .q-terms-row {
+            display: flex; align-items: flex-start; gap: 10px;
+            font-size: 11.5px; color: var(--c-muted); cursor: pointer;
+            line-height: 1.5; margin-bottom: 20px;
+            justify-content: center; text-align: center;
+        }
+        .q-terms-row input { margin-top: 3px; cursor: pointer; accent-color: var(--c-ink); flex-shrink: 0; }
+        .q-terms-row a { color: #e0186c; text-decoration: underline; text-underline-offset: 2px; }
+
+        /* ── CTA buttons ── */
+        .q-btn-black {
+            width: 100%; height: 52px;
+            background: #e0186c; color: #fff;
+            border: none; border-radius: 14px;
+            font-family: var(--font-display); font-size: 14px;
+            letter-spacing: 3px; text-transform: uppercase;
+            cursor: pointer; transition: opacity 0.2s; box-sizing: border-box;
+        }
+        .q-btn-black:hover:not(:disabled) { background: #b8005a; }
+        .q-btn-black:disabled { background: #f0c0d8; cursor: not-allowed; }
+        .q-btn-outline {
+            width: 100%; height: 52px;
+            background: transparent; color: var(--c-ink);
+            border: 1.5px solid var(--c-line); border-radius: 14px;
+            font-family: var(--font-display); font-size: 14px;
+            letter-spacing: 3px; text-transform: uppercase;
+            cursor: pointer; transition: border-color 0.2s, background 0.2s; box-sizing: border-box;
+        }
+        .q-btn-outline:hover { border-color: #e0186c; color: #e0186c; background: #fff0f6; }
+
+        /* ── PIX screen ── */
+        #q-step-pix {
+            display: none; text-align: center;
+            padding: 36px 28px; flex-direction: column; gap: 16px; align-items: center;
+        }
+        #q-step-pix h2 {
+            font-family: var(--font-display); font-size: 19px;
+            letter-spacing: 3px; text-transform: uppercase; margin: 0; font-weight: 400;
+        }
+        .q-pix-subtitle { font-size: 13px; color: var(--c-muted); margin: 0; line-height: 1.6; }
+        .q-pix-qr { width: 180px; height: 180px; border: 1px solid var(--c-line); padding: 6px; margin: 0 auto; }
+        .q-pix-qr img { width: 100%; height: 100%; }
+        .q-pix-copiacola { display: flex; gap: 8px; width: 100%; max-width: 320px; margin: 0 auto; }
+        .q-pix-copiacola input {
+            flex: 1; height: 40px; padding: 0 12px; border: 1px solid var(--c-line);
+            background: var(--c-surface); font-size: 11px; font-family: var(--font-body);
+            outline: none; min-width: 0;
+        }
+        .q-pix-copiacola button {
+            height: 40px; padding: 0 14px; background: #e0186c; color: #fff;
+            border: none; font-size: 10px; font-weight: 600; letter-spacing: 1px;
+            text-transform: uppercase; cursor: pointer;
+        }
+        .q-pix-status { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--c-muted); }
+        @keyframes q-pix-pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+        .q-pix-waiting { animation: q-pix-pulse 1.5s infinite ease-in-out; color: #d97706; }
+        .q-pix-approved { color: #e0186c; }
+        .q-pix-cancel { font-size: 11px; color: var(--c-muted); text-decoration: underline; cursor: pointer; margin-top: 4px; }
+
+        /* ── Loading ── */
+        @keyframes q-slide { from{transform:translateX(-100%)} to{transform:translateX(100%)} }
+        @keyframes q-alt-show { 0%,5%{opacity:0;transform:translateY(6px)} 15%,45%{opacity:1;transform:translateY(0)} 55%,100%{opacity:0;transform:translateY(-6px)} }
+        @keyframes q-alt-hide { 0%,55%{opacity:0;transform:translateY(6px)} 65%,95%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-6px)} }
+        #q-loading-box {
+            display: none; padding: 28px;
+            text-align: center; flex: 1; flex-direction: column;
+            align-items: center; justify-content: center; min-height: 60vh;
+        }
+        .q-loading-texts {
+            position: relative; height: 36px; width: 100%;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 24px;
+        }
+        .q-loading-t1, .q-loading-t2 {
+            position: absolute; width: 100%;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .q-loading-t1 {
+            font-family: var(--font-display); font-size: 15px; letter-spacing: 4px;
+            text-transform: uppercase; color: var(--c-ink);
+            animation: q-alt-show 3.6s ease-in-out infinite;
+        }
+        .q-loading-t2 {
+            animation: q-alt-hide 3.6s ease-in-out infinite;
+            text-decoration: none; opacity: 0;
+        }
+        .q-loading-t2 span {
+            font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+            color: var(--c-muted); font-family: var(--font-body);
+        }
+        .q-loading-t2 img { height: 16px; width: auto; opacity: 0.7; }
+        .q-loading-bar { height: 3px; background: var(--c-line); width: 100%; position: relative; overflow: hidden; border-radius: 2px; }
+        .q-loading-bar > div {
+            position: absolute; top: 0; left: 0; height: 100%; width: 100%;
+            background: #e0186c; border-radius: 2px;
+            transform: scaleX(0); transform-origin: left;
+            transition: transform 0.3s ease-out;
+        }
+
+        /* ── Result ── */
+        #q-step-result { display: none; flex-direction: column; gap: 0; align-items: stretch; }
+
+        .q-res-title {
+            display: block;
+            font-family: var(--font-display); font-size: 15px;
+            letter-spacing: 3px; text-transform: uppercase;
+            color: var(--c-ink); padding: 20px 28px 16px; margin: 0;
+            border-bottom: 1px solid var(--c-line);
+            text-align: center;
+        }
+        .q-res-subtitle, .q-res-note { display: none; }
+
+        #q-result-img-col {
+            width: 100%; max-height: 56vh; background: var(--c-surface);
+            overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+        #q-result-img-col img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
+
+        #q-result-actions-col {
+            display: flex; flex-direction: column; gap: 8px;
+            padding: 20px 28px 26px;
+        }
+        .q-res-mobile-only { margin: 0; }
+
+        /* CTA de compra na tela de resultado */
+        .q-result-prodinfo { text-align: left; margin-bottom: 6px; }
+        .q-result-prodname {
+            font-family: var(--font-body); font-size: 14px; font-weight: 700;
+            color: var(--c-ink); line-height: 1.25; margin-bottom: 6px;
+        }
+        .q-result-prodprice {
+            font-family: var(--font-display); font-size: 18px; letter-spacing: .5px; font-weight: 700;
+            color: var(--c-ink); line-height: 1;
+        }
+        .q-result-installment {
+            font-family: var(--font-body); font-size: 12px; color: var(--c-muted);
+            margin-top: 4px; letter-spacing: .2px;
+        }
+        .q-scarcity {
+            margin-top: 12px; font-family: var(--font-body); font-size: 13px; font-weight: 700;
+            color: var(--c-danger); letter-spacing: 1.5px; text-transform: uppercase;
+            display: flex; align-items: center; justify-content: flex-start; gap: 6px;
+        }
+        .q-scarcity i { font-size: 15px; }
+        /* Selos de segurança */
+        .q-seals {
+            display: flex; justify-content: flex-start; gap: 30px;
+            margin: 8px 0; padding: 12px 0;
+            border-top: 1px solid var(--c-line); border-bottom: 1px solid var(--c-line);
+        }
+        .q-seal { display: flex; align-items: center; gap: 9px; }
+        .q-seal > i { font-size: 24px; color: var(--c-ink); flex-shrink: 0; }
+        .q-seal span {
+            font-family: var(--font-body); font-size: 12px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .6px; line-height: 1.25;
+            color: var(--c-ink); text-align: left;
+        }
+        .q-fakebuy {
+            position: fixed; left: 18px; bottom: 18px; z-index: 2147483000;
+            background: var(--c-bg, #fff); color: var(--c-ink); border: 1px solid var(--c-line); border-radius: 10px;
+            box-shadow: 0 8px 28px -6px rgba(0,0,0,.28); padding: 11px 14px;
+            display: flex; align-items: center; gap: 10px; max-width: 290px;
+            font-family: var(--font-body); opacity: 0; transform: translateY(14px);
+            pointer-events: none; transition: opacity .35s ease, transform .35s ease;
+        }
+        .q-fakebuy.show { opacity: 1; transform: translateY(0); }
+        .q-fakebuy > i { font-size: 22px; color: var(--c-ink); flex-shrink: 0; }
+        .q-fakebuy strong { font-size: 12.5px; font-weight: 700; }
+        .q-fakebuy > div { display: flex; flex-direction: column; line-height: 1.35; }
+        .q-fakebuy span { font-size: 10.5px; color: var(--c-muted); }
+        @media (max-width:560px){ .q-fakebuy{ left:12px; right:12px; bottom:12px; max-width:none; } }
+        .q-btn-buy-now {
+            background: var(--c-ink); color: #fff; border: 1px solid var(--c-ink);
+            width: 100%; padding: 17px 18px; font-family: var(--font-body);
+            font-weight: 700; font-size: 15px; letter-spacing: .2px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            border-radius: 14px; transition: .2s; line-height: 1.2;
+        }
+        .q-btn-buy-now:hover { opacity: .88; }
+        .q-btn-buy-now .q-buy-price { font-weight: 800; white-space: nowrap; }
+        .q-buy-trust {
+            text-align: center; font-size: 11px; color: var(--c-muted);
+            margin-top: 2px; letter-spacing: .2px;
+        }
+
+        /* ── Related products ── */
+        #q-related-products { padding: 0 28px 28px; }
+        #q-related-products h4 {
+            font-family: var(--font-display); font-size: 13px;
+            letter-spacing: 3px; text-transform: uppercase;
+            color: #e0186c; margin: 20px 0 12px; font-weight: 400;
+        }
+        .q-related-grid {
+            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .q-related-grid::-webkit-scrollbar { display: none; }
+        .q-related-card {
+            flex: 0 0 calc(33.333% - 7px); min-width: 88px;
+            text-decoration: none; color: var(--c-ink);
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .q-related-card img {
+            width: 100%; aspect-ratio: 1/1; object-fit: cover;
+            border: 1px solid var(--c-line); display: block; border-radius: 3px;
+        }
+        .q-related-card-name {
+            font-size: 10px; font-weight: 500; line-height: 1.4; color: var(--c-ink);
+            overflow: hidden; display: -webkit-box;
+            -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        }
+
+        /* Desktop result split */
+        @media (min-width: 768px) {
+            .q-card-ia.is-result { width: 780px !important; max-width: 90vw !important; max-height: 92vh !important; }
+                /* .q-powered-footer always visible */
+            .q-card-ia.is-result .q-content-scroll {
+                padding: 0 !important; overflow-y: auto !important;
+                display: flex !important; flex-direction: column !important;
+            }
+            .q-card-ia.is-result #q-step-result {
+                display: flex !important; flex-direction: row !important;
+                flex-wrap: wrap !important; width: 100%; align-items: stretch; gap: 0;
+            }
+            .q-card-ia.is-result .q-res-title {
+                flex-basis: 100%; order: -1;
+                font-size: 16px; letter-spacing: 3px;
+                padding: 16px 24px; border-bottom: 1px solid #f5c6e0;
+            }
+            .q-card-ia.is-result #q-result-img-col {
+                width: 44% !important; min-height: 360px !important;
+                border-right: 1px solid var(--c-line); flex-shrink: 0;
+            }
+            .q-card-ia.is-result #q-result-img-col img {
+                width: 100% !important; height: 100% !important;
+                object-fit: cover !important; object-position: top center !important;
+            }
+            .q-card-ia.is-result #q-result-actions-col {
+                width: 56% !important; padding: 28px 24px !important;
+                display: flex !important; flex-direction: column !important;
+                justify-content: flex-start; gap: 10px;
+                overflow-y: auto;
+            }
+            .q-card-ia.is-result #q-related-products { padding: 0; margin-top: 4px; }
+            .q-card-ia.is-result .q-res-mobile-only { display: flex !important; }
+        }
+
+        /* ── Error screen ── */
+        #q-step-error {
+            display: none; flex-direction: column; gap: 20px;
+            align-items: center; text-align: center;
+            padding: 52px 28px;
+        }
+        #q-step-error h2 {
+            font-family: var(--font-display); font-size: 18px;
+            letter-spacing: 3px; text-transform: uppercase; margin: 0; font-weight: 400;
+        }
+        #q-step-error p { font-size: 13px; color: var(--c-muted); margin: 0; line-height: 1.6; }
+
+        /* ── Footer ── */
+        .q-powered-footer {
+            background: var(--c-surface); padding: 14px 20px;
+            display: flex; align-items: center; justify-content: center; gap: 9px;
+            flex-shrink: 0; border-top: 1px solid var(--c-line); text-decoration: none;
+        }
+        .q-powered-footer span { font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--c-muted); }
+        .q-quantic-logo { height: 20px; opacity: 0.7; }
+    
+
+/* tela de resultado em coluna unica (o preview e um celular) */
+#q-step-result { display:flex; flex-direction:column; padding:0 22px 26px; }
+#q-result-img-col { width:100%; }
+#q-final-view-img { width:100%; height:auto; border-radius:14px; display:block; }
+#q-result-actions-col { width:100%; margin-top:14px; }
+
+/* ===== fluxo ESCOLHER LENTES (mesma linguagem visual do provador) ===== */
+#q-step-lentes, #q-step-receita, #q-step-upload, #q-step-lente-final {
+    display: none; flex-direction: column; padding: 26px 28px 30px; gap: 0;
+}
+.q-passos { display:flex; gap:5px; margin-bottom:20px; }
+.q-passos i { height:3px; flex:1; background:var(--c-line); border-radius:2px; }
+.q-passos i.on   { background:var(--c-ink); }
+.q-passos i.done { background:var(--c-accent); opacity:.45; }
+
+.q-opt {
+    width:100%; text-align:left; background:var(--c-bg);
+    border:1.5px solid var(--c-line); border-radius:14px;
+    padding:15px 16px; margin-bottom:10px; cursor:pointer; font-family:var(--font-body);
+    display:flex; flex-direction:column; gap:3px; transition:border-color .18s, background .18s;
+}
+.q-opt:hover { border-color:var(--c-ink); background:var(--c-surface); }
+.q-opt-t { font-size:14px; font-weight:600; color:var(--c-ink-text, var(--c-ink)); }
+.q-opt-s { font-size:11.5px; color:var(--c-muted); line-height:1.45; }
+.q-opt-destaque { border-color:var(--c-ink); background:var(--c-surface); }
+
+.q-lente-drop {
+    border:2px dashed var(--c-line); border-radius:14px; padding:32px 20px;
+    text-align:center; cursor:pointer; transition:border-color .18s, background .18s;
+}
+.q-lente-drop:hover { border-color:var(--c-ink); background:var(--c-surface); }
+.q-lente-drop-i { font-size:30px; margin-bottom:8px; }
+.q-lente-drop-t { font-size:13.5px; font-weight:600; color:var(--c-ink-text, var(--c-ink)); }
+.q-lente-drop-s { font-size:11px; color:var(--c-muted); margin-top:3px; }
+
+.q-lendo { display:flex; flex-direction:column; align-items:center; gap:12px; padding:22px 10px;
+           font-size:12.5px; color:var(--c-muted); }
+.q-lendo img { max-width:140px; max-height:180px; border-radius:10px;
+               border:1px solid var(--c-line); box-shadow:0 4px 14px rgba(0,0,0,.10); }
+.q-lendo-arq { font-size:11px; font-weight:600; color:var(--c-ink-text, var(--c-ink));
+               word-break:break-all; text-align:center; max-width:220px; }
+.q-spin { width:26px; height:26px; border:2.5px solid var(--c-line);
+          border-top-color:var(--c-ink); border-radius:50%; animation:q-spin .8s linear infinite; }
+@keyframes q-spin { to { transform: rotate(360deg); } }
+
+.q-banner-ia { background:var(--c-surface); border:1px solid var(--c-line); border-radius:11px;
+               padding:11px 13px; font-size:11.5px; line-height:1.5; color:var(--c-ink-text, var(--c-ink));
+               margin-bottom:14px; }
+.q-erro-leitura { background:#fff5f5; border:1px solid #fbc4c4; border-radius:11px;
+                  padding:11px 13px; font-size:11.5px; line-height:1.55; color:#9b2c2c; margin-top:10px; }
+.q-erro-leitura a { color:#9b2c2c; font-weight:700; text-decoration:underline; cursor:pointer; }
+
+.q-olho { border:1.5px solid var(--c-line); border-radius:13px; padding:12px 13px; margin-bottom:11px; }
+.q-olho-tag { font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--c-muted);
+              font-weight:600; display:block; margin-bottom:9px; }
+.q-olho-campos { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.q-olho-campos label { font-size:9.5px; text-transform:uppercase; letter-spacing:.06em;
+                       color:var(--c-muted); display:flex; flex-direction:column; gap:4px; }
+.q-olho-campos select { border:1.5px solid var(--c-line); border-radius:9px; padding:8px 6px;
+                        font-size:12.5px; font-family:var(--font-body); background:var(--c-bg);
+                        color:var(--c-ink-text, var(--c-ink)); }
+
+.q-card-lente { border:2px solid var(--c-ink); border-radius:14px; padding:17px; margin-bottom:12px; }
+/* foto do produto vinda da loja (1024px: deixamos o browser reduzir) */
+.q-lente-foto { width:100%; max-width:190px; height:auto; display:block; margin:0 auto 13px;
+                border-radius:10px; background:var(--c-surface); }
+.q-opt-lente { flex-direction:row; align-items:center; gap:12px; }
+.q-opt-foto  { width:52px; height:52px; object-fit:cover; border-radius:9px; flex-shrink:0;
+               background:var(--c-surface); }
+.q-opt-txt   { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.q-card-lente-nome { font-size:14px; font-weight:600; line-height:1.35; }
+.q-card-lente-mat  { font-size:11px; color:var(--c-muted); margin:3px 0 11px; }
+.q-card-lente-preco{ font-size:27px; font-weight:700; }
+.q-card-lente-parc { font-size:11.5px; color:var(--c-muted); margin-top:1px; }
+.q-card-lente-pq   { background:var(--c-surface); border-radius:10px; padding:11px 12px;
+                     margin-top:13px; font-size:12px; line-height:1.5; }
+.q-card-lente-pq b { display:block; font-size:9.5px; text-transform:uppercase; letter-spacing:.1em;
+                     color:var(--c-muted); margin-bottom:4px; }
+.q-disclaimer { font-size:10.5px; color:var(--c-muted); line-height:1.5; margin-top:11px;
+                padding-top:11px; border-top:1px solid var(--c-line); }
+.q-resumo { font-size:11.5px; color:var(--c-muted); line-height:1.6; margin-bottom:8px; }
+
+.q-sair, .q-voltar { display:block; text-align:center; font-size:11.5px; color:var(--c-muted);
+                     text-decoration:underline; cursor:pointer; margin-top:12px; }
+.q-sair:hover, .q-voltar:hover { color:var(--c-ink); }
+.q-btn-sub { display:block; font-size:10px; font-weight:500; opacity:.8; margin-top:2px;
+             letter-spacing:.02em; text-transform:none; }
+.q-btn-outline .q-btn-sub { color:var(--c-muted); opacity:1; }
+
+</style>
+
+<script src="lentes.js" charset="utf-8"></script>
+<script src="fluxo.js" charset="utf-8"></script>

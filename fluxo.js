@@ -119,11 +119,13 @@
         if (!rec || rec.fora) {          // fora da faixa: não trava a venda, chama a ótica
             st.lente = null;
             $('#q-card-lente').innerHTML =
-                '<div class="q-card-lente-nome">A gente monta a sua sob medida</div>' +
+                '<div class="q-card-lente-nome">Sua lente sai sob medida</div>' +
                 '<div class="q-card-lente-mat">' + (MOTIVO[rec && rec.fora] || MOTIVO.sem_produto) + '</div>' +
                 '<div class="q-card-lente-pq"><b>o que acontece agora</b>' +
-                'Leve a armação e a nossa ótica te chama no WhatsApp pra fechar a lente certa ' +
-                'pro seu grau — sem custo a mais pela consulta.</div>';
+                'Leve a armação — <strong>seu grau já está anotado aqui</strong>. ' +
+                'A nossa ótica te chama no WhatsApp com o valor da sua lente, ' +
+                'sem custo a mais pela consulta.</div>' +
+                resumoDoGrau();
             $('#q-alternativas').innerHTML = '';
             $('#q-resumo-lente').textContent = '';
             $('#q-add-lente').textContent = 'LEVAR A ARMAÇÃO E FALAR COM A ÓTICA';
@@ -140,6 +142,22 @@
         $('#q-resultado-lente').hidden = false;
         $('#q-lente-titulo').textContent = 'Sua lente indicada';
         ir('q-step-lente-final');
+    }
+
+    /* Devolve o grau que a cliente informou, pra ela ver que nao foi em vao.
+       Se nao houver receita (sem grau), nao mostra nada. */
+    function resumoDoGrau() {
+        const r = st.receita;
+        if (!r) return '';
+        const s = v => (v > 0 ? '+' : '') + Number(v).toFixed(2).replace('.', ',');
+        const olho = (esf, cil, eixo) =>
+            s(esf) + (Number(cil) ? ' ' + s(cil) + (eixo != null ? ' ' + eixo + '&deg;' : '') : '');
+        return '<div class="q-grau-anotado">' +
+            '<b>o que a ótica recebeu</b>' +
+            '<span>OD ' + olho(r.odEsf, r.odCil, r.odEixo) + '</span>' +
+            '<span>OE ' + olho(r.oeEsf, r.oeCil, r.oeEixo) + '</span>' +
+            (r.adicao != null ? '<span>Adição ' + s(r.adicao) + '</span>' : '') +
+            '</div>';
     }
 
     function pintarCard(l, porque) {

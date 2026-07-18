@@ -1,14 +1,18 @@
 /* ==========================================================================
-   ESCOLHER LENTES — catálogo da loja + escolha pela seleção da cliente
+   ESCOLHER LENTES — regra da ótica + catálogo real da loja
 
-   Regra do jogo: NÃO inventamos regra de óptica (faixa de grau, índice,
-   espessura). Isso é do laboratório. O provador só faz uma coisa:
-   pega o que a cliente escolheu (tipo de visão + tratamento + se tem
-   astigmatismo) e mostra a lente do catálogo DELA que atende, mais barata
-   primeiro. As demais compatíveis ficam como upgrade.
+   A REGRA é da Maxilook, não nossa. Ela define uma faixa que o laboratório
+   atende pronto, e as 4 lentes recomendadas dentro dela:
 
-   Os atributos de cada lente saem do próprio nome do produto na loja —
-   gerado por gera_lentes.py a partir da API da Nuvemshop.
+       Monofocal (só longe OU só perto)
+       Esférico   +4,00 a -4,00
+       Cilíndrico  0,00 a  2,00
+
+   Dentro da faixa → indica pelo tratamento escolhido (4 opções abaixo).
+   Fora da faixa, ou multifocal → não indicamos nada: a ótica monta sob medida
+   e fala com a cliente no WhatsApp. Melhor não vender do que vender errado.
+
+   Preço, foto e variantId vêm da API da Nuvemshop (gera_lentes.py).
    Loja: Ótica Maxilook (7085367) · catálogo de 18/07/2026
    ========================================================================== */
 
@@ -78,71 +82,79 @@ const LENTES = [
     img: 'https://acdn-us.mitiendanube.com/stores/007/085/367/products/b2469a1ba286035bdb983625ed0c6a28-7594fd160dcc83d13917665863090289-1024-1024.png' },
 ];
 
+/* A faixa que a ótica atende pronto. Cilíndrico comparado em módulo. */
+const FAIXA = { esfMin: -4.00, esfMax: 4.00, cilMax: 2.00 };
+
+/* As 4 recomendações da ótica, por tratamento escolhido. */
+const RECOMENDACAO = {
+  antirreflexo:       '316444407',   // Básicas 1.56 com Antirreflexo
+  blue:               '314902019',   // Básicas 1.56 Antirreflexo + Anti Blue
+  fotocromatica:      '332987251',   // Fotocromáticas com Antirreflexo
+  fotocromatica_blue: '339075492',   // Fotocromáticas Anti Blue com Antirreflexo
+};
+
 /* --------------------------------------------------------------------------
-   Escolha: filtra o catálogo pelo que a cliente marcou.
-   A receita só serve para UMA coisa aqui: descobrir se tem astigmatismo
-   (cilíndrico != 0). Grau não entra na conta — quem confere é a ótica.
+   A receita serve para UMA coisa: dizer se o grau cabe na faixa da ótica.
+   Não escolhemos material, índice nem espessura — isso é do laboratório.
 -------------------------------------------------------------------------- */
 
-/** true se qualquer olho tem cilíndrico != 0; null se não temos receita. */
-function temAstigmatismo(receita) {
-  if (!receita) return null;
-  return (Number(receita.odCil) !== 0 || Number(receita.oeCil) !== 0);
-}
+/** Confere os dois olhos contra a faixa. Devolve o motivo quando não cabe. */
+function dentroDaFaixa(receita) {
+  if (!receita) return { ok: true };            // sem grau (descanso): nada a conferir
 
-/** A lente atende o tratamento pedido? (pode ter mais, nunca menos) */
-function atendeTratamento(lente, trat) {
-  if (trat === 'fotocromatica') return lente.foto;
-  if (trat === 'blue') return lente.blue;
-  return lente.ar;                       // antirreflexo: o básico pedido
+  const esfs = [Number(receita.odEsf) || 0, Number(receita.oeEsf) || 0];
+  const cils = [Math.abs(Number(receita.odCil) || 0), Math.abs(Number(receita.oeCil) || 0)];
+
+  const piorEsf = esfs.reduce((a, b) => Math.abs(a) >= Math.abs(b) ? a : b);
+  const piorCil = Math.max(...cils);
+
+  if (piorEsf < FAIXA.esfMin || piorEsf > FAIXA.esfMax)
+    return { ok: false, motivo: 'esferico', valor: piorEsf };
+  if (piorCil > FAIXA.cilMax)
+    return { ok: false, motivo: 'cilindrico', valor: piorCil };
+
+  return { ok: true, piorEsf, piorCil };
 }
 
 /**
- * @param {{visao:string, trat:string, astig:'sim'|'nao', receita:object|null}} e
- * @returns {{lente, porque, alternativas:[], astigDetectado}|null}
- *          null = catálogo não tem nada compatível → manda pra ótica
+ * @param {{visao:string, trat:string, receita:object|null}} e
+ * @returns {{lente, porque, temAstig}}          indicação normal
+ *        | {fora:'multifocal'|'esferico'|'cilindrico', valor?}   → ótica
  */
 function recomendar(e) {
-  // Astigmatismo: se temos a receita, ela manda — a cliente pode não saber.
-  const daReceita = temAstigmatismo(e.receita);
-  const astig = daReceita === null ? (e.astig === 'sim') : daReceita;
+  // A regra da ótica cobre monofocal. Multifocal ainda não tem faixa definida.
+  if (e.visao === 'multifocal') return { fora: 'multifocal' };
 
-  // "Sem grau" (descanso) usa as lentes monofocais sem astigmatismo.
-  const visao = e.visao === 'descanso' ? 'simples' : e.visao;
+  const faixa = dentroDaFaixa(e.receita);
+  if (!faixa.ok) return { fora: faixa.motivo, valor: faixa.valor };
 
-  const compativeis = LENTES
-    .filter(l => l.visao === visao)
-    .filter(l => l.astig === astig)
-    .filter(l => atendeTratamento(l, e.trat));
+  const lente = LENTES.find(l => l.id === RECOMENDACAO[e.trat]);
+  if (!lente) return { fora: 'sem_produto' };
 
-  if (!compativeis.length) return null;
-
-  const [lente, ...resto] = compativeis;       // catálogo já vem por preço
   return {
     lente,
-    alternativas: resto,
-    astigDetectado: astig ? 'sim' : 'nao',
-    porque: porque(lente, e.trat, astig, e.visao)
+    temAstig: (faixa.piorCil || 0) > 0,
+    porque: porque(e.trat, faixa)
   };
 }
 
-/** Explica a escolha com o que a cliente marcou — sem prometer óptica. */
-function porque(lente, trat, astig, visao) {
+/** Explica com base na escolha e no grau — sem prometer o que é da ótica. */
+function porque(trat, faixa) {
   const p = [];
-  if (visao === 'multifocal') p.push('multifocal, para perto e para longe');
-  else if (visao === 'descanso') p.push('sem grau');
-  if (astig) p.push('feita para corrigir astigmatismo');
-  if (trat === 'fotocromatica') p.push('escurece no sol e clareia dentro de casa');
-  else if (trat === 'blue') p.push('filtra a luz azul das telas');
+  if (trat === 'fotocromatica' || trat === 'fotocromatica_blue')
+    p.push('escurece no sol e clareia dentro de casa');
   else p.push('com antirreflexo');
-  return 'É a opção mais em conta do catálogo que atende o que você escolheu: '
+  if (trat === 'blue' || trat === 'fotocromatica_blue')
+    p.push('filtra a luz azul das telas');
+  if (faixa.piorCil > 0) p.push('e atende o seu astigmatismo');
+  return 'Seu grau está na faixa que a gente monta pronto. Esta lente vem '
        + p.join(', ') + '.';
 }
 
 if (typeof window !== 'undefined') {
   window.LENTES = LENTES; window.recomendar = recomendar;
-  window.temAstigmatismo = temAstigmatismo;
+  window.FAIXA = FAIXA; window.dentroDaFaixa = dentroDaFaixa;
 }
 if (typeof module !== 'undefined') {
-  module.exports = { LENTES, recomendar, temAstigmatismo };
+  module.exports = { LENTES, FAIXA, RECOMENDACAO, recomendar, dentroDaFaixa };
 }

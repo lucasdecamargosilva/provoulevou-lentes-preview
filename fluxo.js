@@ -77,24 +77,40 @@
     }
 
     /* ---------- recomendação ---------- */
+    const TRAT_LABEL = {
+        antirreflexo: 'Antirreflexo',
+        blue: 'Antirreflexo + luz azul',
+        fotocromatica: 'Fotocromática',
+        fotocromatica_blue: 'Fotocromática + luz azul'
+    };
+
+    /* Grau fora da faixa da ótica: explica em português, sem número técnico solto. */
+    const MOTIVO = {
+        multifocal: 'Lente multifocal a gente monta sob medida pra cada pessoa.',
+        esferico: 'Seu grau está acima do que deixamos pronto no site.',
+        cilindrico: 'Seu astigmatismo está acima do que deixamos pronto no site.',
+        sem_produto: 'Essa combinação a gente monta sob medida.'
+    };
+
     function mostrarLente(rec) {
-        if (!rec) {                      // sem lente compatível: não trava, manda pra ótica
+        if (!rec || rec.fora) {          // fora da faixa: não trava a venda, chama a ótica
+            st.lente = null;
             $('#q-card-lente').innerHTML =
-                '<div class="q-card-lente-nome">Sua combinação a ótica monta sob medida</div>' +
-                '<div class="q-card-lente-mat">Não temos essa lente pronta no site</div>' +
+                '<div class="q-card-lente-nome">A gente monta a sua sob medida</div>' +
+                '<div class="q-card-lente-mat">' + (MOTIVO[rec && rec.fora] || MOTIVO.sem_produto) + '</div>' +
                 '<div class="q-card-lente-pq"><b>o que acontece agora</b>' +
-                'Compre a armação e a gente te chama no WhatsApp pra fechar a lente certa.</div>';
+                'Leve a armação e a nossa ótica te chama no WhatsApp pra fechar a lente certa ' +
+                'pro seu grau — sem custo a mais pela consulta.</div>';
             $('#q-alternativas').innerHTML = '';
             $('#q-resumo-lente').textContent = '';
-            $('#q-add-lente').textContent = 'COMPRAR ARMAÇÃO E FALAR COM A ÓTICA';
+            $('#q-add-lente').textContent = 'LEVAR A ARMAÇÃO E FALAR COM A ÓTICA';
         } else {
-            st.lente = rec.lente;                       // a indicada já vem selecionada
+            st.lente = rec.lente;
             pintarCard(rec.lente, rec.porque);
-            pintarAlternativas(rec.alternativas);
+            $('#q-alternativas').innerHTML = '';
             const tipo = { simples: 'Visão simples', multifocal: 'Multifocal', descanso: 'Sem grau' }[st.visao];
-            const trat = { antirreflexo: 'Antirreflexo', blue: 'Antirreflexo + luz azul', fotocromatica: 'Fotocromática' }[st.trat] || '—';
-            $('#q-resumo-lente').innerHTML = 'Você escolheu: ' + tipo + ' &middot; ' + trat +
-                (rec.astigDetectado === 'sim' ? ' &middot; <strong>com astigmatismo</strong>' : '');
+            $('#q-resumo-lente').innerHTML = 'Você escolheu: ' + tipo + ' &middot; ' + (TRAT_LABEL[st.trat] || '—') +
+                (rec.temAstig ? ' &middot; <strong>com astigmatismo</strong>' : '');
             $('#q-add-lente').textContent = 'ADICIONAR ARMAÇÃO + LENTE';
         }
         $('#q-form-receita').hidden = true;
@@ -113,21 +129,6 @@
             (porque ? '<div class="q-card-lente-pq"><b>por que essa lente</b>' + porque + '</div>' : '') +
             '<div class="q-disclaimer">Indicação com base no que você escolheu, ' +
             '<strong>conferida pela nossa ótica</strong> antes da montagem.</div>';
-    }
-
-    /* As outras lentes do catálogo que atendem a mesma escolha — upgrade opcional. */
-    function pintarAlternativas(alts) {
-        const box = $('#q-alternativas');
-        if (!alts || !alts.length) { box.innerHTML = ''; return; }
-        box.innerHTML = '<span class="q-section-label" style="margin-top:6px;">Quer trocar?</span>' +
-            alts.map(l =>
-                '<button class="q-opt q-opt-lente" data-lente="' + l.id + '">' +
-                (l.img ? '<img class="q-opt-foto" src="' + l.img + '" alt="" decoding="async">' : '') +
-                '<span class="q-opt-txt">' +
-                '<span class="q-opt-t">' + l.nome + '</span>' +
-                '<span class="q-opt-s">' + l.material + ' &middot; <b>' + brl(l.preco) + '</b></span>' +
-                '</span></button>'
-            ).join('');
     }
 
     function recomendarAgora() {
@@ -158,7 +159,7 @@
 
     /* ---------- cliques ---------- */
     document.addEventListener('click', e => {
-        const t = e.target.closest('[data-ir],[data-visao],[data-trat],[data-receita],[data-carrinho],[data-lente],' +
+        const t = e.target.closest('[data-ir],[data-visao],[data-trat],[data-receita],[data-carrinho],' +
             '#q-btn-escolher-lentes,#q-btn-buy-now,#q-abrir-arquivo,#q-ver-lente,#q-add-lente');
         if (!t) return;
         e.preventDefault();
@@ -190,18 +191,6 @@
         }
 
         if (t.dataset.carrinho === 'sem') { carrinho(null); return; }
-
-        /* trocou pela alternativa: vira a selecionada e reordena a lista */
-        if (t.dataset.lente) {
-            const rec = window.recomendar({ visao: st.visao, trat: st.trat, astig: st.astig, receita: st.receita });
-            if (!rec) return;
-            const todas = [rec.lente, ...rec.alternativas];
-            st.lente = todas.find(l => l.id === t.dataset.lente) || rec.lente;
-            pintarCard(st.lente, st.lente.id === rec.lente.id ? rec.porque : null);
-            pintarAlternativas(todas.filter(l => l.id !== st.lente.id));
-            $('.q-content-scroll').scrollTop = 0;
-            return;
-        }
 
         if (t.id === 'q-add-lente') { carrinho(st.lente); return; }
     });

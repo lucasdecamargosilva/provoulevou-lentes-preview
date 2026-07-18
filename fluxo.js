@@ -89,6 +89,9 @@
         multifocal: 'Lente multifocal a gente monta sob medida pra cada pessoa.',
         esferico: 'Seu grau está acima do que deixamos pronto no site.',
         cilindrico: 'Seu astigmatismo está acima do que deixamos pronto no site.',
+        // pediu um tratamento que não existe pro grau dela (ex.: fotocromática
+        // com astigmatismo alto) — é falta de produto pronto, não grau fora
+        tratamento: 'Esse tratamento a gente não deixa pronto pro seu grau.',
         sem_produto: 'Essa combinação a gente monta sob medida.'
     };
 

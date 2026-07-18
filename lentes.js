@@ -1,16 +1,15 @@
 /* ==========================================================================
-   ESCOLHER LENTES — regra da ótica + catálogo real da loja
+   ESCOLHER LENTES — regras da ótica + catálogo real da loja
 
-   A REGRA é da Maxilook, não nossa. Ela define uma faixa que o laboratório
-   atende pronto, e as 4 lentes recomendadas dentro dela:
+   As REGRAS são da Maxilook. Cada faixa diz que grau o laboratório atende
+   pronto e quais lentes servem naquela faixa, por tratamento escolhido.
 
-       Monofocal (só longe OU só perto)
-       Esférico   +4,00 a -4,00
-       Cilíndrico  0,00 a  2,00
+   Faixa 1  esf +4,00 a -4,00 · cil até 2,00      → 4 lentes (1.56 comum)
+   Faixa 2  esf +4,00 a -4,00 · cil 2,25 a 4,00   → 2 lentes (para astigmatismo)
 
-   Dentro da faixa → indica pelo tratamento escolhido (4 opções abaixo).
-   Fora da faixa, ou multifocal → não indicamos nada: a ótica monta sob medida
-   e fala com a cliente no WhatsApp. Melhor não vender do que vender errado.
+   Fora das faixas, multifocal, ou tratamento que não existe naquela faixa:
+   não indicamos nada. A ótica monta sob medida e chama no WhatsApp.
+   Melhor não vender do que vender errado.
 
    Preço, foto e variantId vêm da API da Nuvemshop (gera_lentes.py).
    Loja: Ótica Maxilook (7085367) · catálogo de 18/07/2026
@@ -82,79 +81,92 @@ const LENTES = [
     img: 'https://acdn-us.mitiendanube.com/stores/007/085/367/products/b2469a1ba286035bdb983625ed0c6a28-7594fd160dcc83d13917665863090289-1024-1024.png' },
 ];
 
-/* A faixa que a ótica atende pronto. Cilíndrico comparado em módulo. */
-const FAIXA = { esfMin: -4.00, esfMax: 4.00, cilMax: 2.00 };
-
-/* As 4 recomendações da ótica, por tratamento escolhido. */
-const RECOMENDACAO = {
-  antirreflexo:       '316444407',   // Básicas 1.56 com Antirreflexo
-  blue:               '314902019',   // Básicas 1.56 Antirreflexo + Anti Blue
-  fotocromatica:      '332987251',   // Fotocromáticas com Antirreflexo
-  fotocromatica_blue: '339075492',   // Fotocromáticas Anti Blue com Antirreflexo
-};
+/* As faixas da ótica, da menor para a maior cilíndrico.
+   Para adicionar uma faixa nova, é só acrescentar aqui — nada mais muda. */
+const FAIXAS = [
+  {
+    nome: 'padrão',
+    esfMin: -4.00, esfMax: 4.00, cilMax: 2.00,
+    lentes: {
+      antirreflexo:       '316444407',  // Básicas 1.56 c/ Antirreflexo      R$ 129
+      blue:               '314902019',  // Básicas 1.56 AR + Anti Blue       R$ 199
+      fotocromatica:      '332987251',  // Fotocromáticas c/ AR              R$ 249
+      fotocromatica_blue: '339075492',  // Fotocromáticas Anti Blue c/ AR    R$ 459
+    }
+  },
+  {
+    nome: 'astigmatismo',
+    esfMin: -4.00, esfMax: 4.00, cilMax: 4.00,
+    lentes: {
+      antirreflexo:       '337827069',  // AR Para Astigmatismo              R$ 199
+      blue:               '339014487',  // Anti Blue AR Para Astigmatismo    R$ 279
+      // fotocromática não existe nesta faixa → cai para a ótica
+    }
+  },
+];
 
 /* --------------------------------------------------------------------------
-   A receita serve para UMA coisa: dizer se o grau cabe na faixa da ótica.
-   Não escolhemos material, índice nem espessura — isso é do laboratório.
+   A receita serve para UMA coisa: achar a faixa. Não escolhemos material,
+   índice nem espessura — isso é do laboratório.
 -------------------------------------------------------------------------- */
 
-/** Confere os dois olhos contra a faixa. Devolve o motivo quando não cabe. */
-function dentroDaFaixa(receita) {
-  if (!receita) return { ok: true };            // sem grau (descanso): nada a conferir
+/** Pior olho: maior módulo, preservando o sinal. */
+function piorOlho(a, b) { return Math.abs(a) >= Math.abs(b) ? a : b; }
 
-  const esfs = [Number(receita.odEsf) || 0, Number(receita.oeEsf) || 0];
-  const cils = [Math.abs(Number(receita.odCil) || 0), Math.abs(Number(receita.oeCil) || 0)];
-
-  const piorEsf = esfs.reduce((a, b) => Math.abs(a) >= Math.abs(b) ? a : b);
-  const piorCil = Math.max(...cils);
-
-  if (piorEsf < FAIXA.esfMin || piorEsf > FAIXA.esfMax)
-    return { ok: false, motivo: 'esferico', valor: piorEsf };
-  if (piorCil > FAIXA.cilMax)
-    return { ok: false, motivo: 'cilindrico', valor: piorCil };
-
-  return { ok: true, piorEsf, piorCil };
+/** Lê o grau dos dois olhos. Sem receita (descanso) = zerado. */
+function grau(receita) {
+  if (!receita) return { esf: 0, cil: 0 };
+  return {
+    esf: piorOlho(Number(receita.odEsf) || 0, Number(receita.oeEsf) || 0),
+    cil: Math.max(Math.abs(Number(receita.odCil) || 0), Math.abs(Number(receita.oeCil) || 0))
+  };
 }
 
 /**
  * @param {{visao:string, trat:string, receita:object|null}} e
- * @returns {{lente, porque, temAstig}}          indicação normal
- *        | {fora:'multifocal'|'esferico'|'cilindrico', valor?}   → ótica
+ * @returns {{lente, porque, temAstig, faixa}}                    indicação
+ *        | {fora:'multifocal'|'esferico'|'cilindrico'|'tratamento'}  → ótica
  */
 function recomendar(e) {
-  // A regra da ótica cobre monofocal. Multifocal ainda não tem faixa definida.
+  // As regras cobrem monofocal. Multifocal ainda não tem faixa definida.
   if (e.visao === 'multifocal') return { fora: 'multifocal' };
 
-  const faixa = dentroDaFaixa(e.receita);
-  if (!faixa.ok) return { fora: faixa.motivo, valor: faixa.valor };
+  const g = grau(e.receita);
 
-  const lente = LENTES.find(l => l.id === RECOMENDACAO[e.trat]);
+  // Faixas estão em ordem crescente de cilíndrico: a primeira que couber vence.
+  const faixa = FAIXAS.find(f => g.cil <= f.cilMax);
+  if (!faixa) return { fora: 'cilindrico', valor: g.cil };
+
+  if (g.esf < faixa.esfMin || g.esf > faixa.esfMax)
+    return { fora: 'esferico', valor: g.esf };
+
+  const id = faixa.lentes[e.trat];
+  // O tratamento pedido pode não existir naquela faixa (ex.: fotocromática
+  // com astigmatismo alto). Isso é falta de produto, não grau fora.
+  if (!id) return { fora: 'tratamento', faixa: faixa.nome };
+
+  const lente = LENTES.find(l => l.id === id);
   if (!lente) return { fora: 'sem_produto' };
 
-  return {
-    lente,
-    temAstig: (faixa.piorCil || 0) > 0,
-    porque: porque(e.trat, faixa)
-  };
+  return { lente, temAstig: g.cil > 0, faixa: faixa.nome, porque: porque(e.trat, g) };
 }
 
 /** Explica com base na escolha e no grau — sem prometer o que é da ótica. */
-function porque(trat, faixa) {
+function porque(trat, g) {
   const p = [];
   if (trat === 'fotocromatica' || trat === 'fotocromatica_blue')
     p.push('escurece no sol e clareia dentro de casa');
   else p.push('com antirreflexo');
   if (trat === 'blue' || trat === 'fotocromatica_blue')
     p.push('filtra a luz azul das telas');
-  if (faixa.piorCil > 0) p.push('e atende o seu astigmatismo');
+  if (g.cil > 0) p.push('e corrige o seu astigmatismo');
   return 'Seu grau está na faixa que a gente monta pronto. Esta lente vem '
        + p.join(', ') + '.';
 }
 
 if (typeof window !== 'undefined') {
-  window.LENTES = LENTES; window.recomendar = recomendar;
-  window.FAIXA = FAIXA; window.dentroDaFaixa = dentroDaFaixa;
+  window.LENTES = LENTES; window.FAIXAS = FAIXAS; window.recomendar = recomendar;
 }
 if (typeof module !== 'undefined') {
-  module.exports = { LENTES, FAIXA, RECOMENDACAO, recomendar, dentroDaFaixa };
+  module.exports = { LENTES, FAIXAS, recomendar, grau };
 }

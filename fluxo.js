@@ -59,21 +59,41 @@
             for (let v = 0; v <= 180; v++) o.push('<option value="' + v + '">' + v + '°</option>');
             s.innerHTML = o.join('');
         });
+        // adição: +0,75 a +3,50, de 0,25 em 0,25 (faixa que a ótica trabalha)
+        $('[data-r="adicao"]').innerHTML = faixa(0.75, 3.50, 0.25);
+    }
+
+    /* Aviso de campo faltando, no proprio formulario (alert trava o fluxo). */
+    function avisar(msg) {
+        const el = $('#q-aviso-campo');
+        el.textContent = msg; el.hidden = false;
+        el.scrollIntoView({ block: 'nearest' });
+    }
+
+    /* A adição só existe em multifocal — é o grau de perto. */
+    function mostrarAdicao() {
+        $('#q-bloco-adicao').hidden = (st.visao !== 'multifocal');
     }
 
     function limparReceita() {
         $$('[data-r]').forEach(s => { s.value = /Cil$/.test(s.dataset.r) ? '0.00' : ''; });
     }
 
+    /* Devolve a receita, ou o nome do campo que faltou. */
     function lerCampos() {
         const g = k => { const el = $('[data-r="' + k + '"]'); return el && el.value !== '' ? Number(el.value) : null; };
         const r = {
             odEsf: g('odEsf'), odCil: g('odCil'), odEixo: g('odEixo'),
             oeEsf: g('oeEsf'), oeCil: g('oeCil'), oeEixo: g('oeEixo')
         };
-        if (r.odEsf === null || r.oeEsf === null) return null;   // esférico é o mínimo
+        if (r.odEsf === null || r.oeEsf === null) return { falta: 'esferico' };
         r.odCil = r.odCil || 0; r.oeCil = r.oeCil || 0;
-        return r;
+
+        if (st.visao === 'multifocal') {          // multifocal sem adição não monta
+            r.adicao = g('adicao');
+            if (r.adicao === null) return { falta: 'adicao' };
+        }
+        return { receita: r };
     }
 
     /* ---------- recomendação ---------- */
@@ -140,6 +160,8 @@
 
     function abrirFormReceita(titulo, banner) {
         $('#q-form-receita').hidden = false;
+        $('#q-aviso-campo').hidden = true;
+        mostrarAdicao();
         $('#q-resultado-lente').hidden = true;
         $('#q-lente-titulo').textContent = titulo;
         const b = $('#q-banner-ia');
@@ -189,8 +211,9 @@
 
         if (t.id === 'q-ver-lente') {
             const r = lerCampos();
-            if (!r) { alert('Preencha ao menos o esférico dos dois olhos.'); return; }
-            st.receita = r; recomendarAgora(); return;
+            if (r.falta === 'esferico') { avisar('Preencha o esférico dos dois olhos.'); return; }
+            if (r.falta === 'adicao') { avisar('Preencha a adição — ela é o grau de perto da multifocal.'); return; }
+            st.receita = r.receita; recomendarAgora(); return;
         }
 
         if (t.dataset.carrinho === 'sem') { carrinho(null); return; }
@@ -253,6 +276,7 @@
             const d = r.dados;
             encaixar($('[data-r="odEsf"]'), d.odEsf); encaixar($('[data-r="oeEsf"]'), d.oeEsf);
             encaixar($('[data-r="odCil"]'), d.odCil); encaixar($('[data-r="oeCil"]'), d.oeCil);
+            if (d.adicao != null) encaixar($('[data-r="adicao"]'), d.adicao);
             if (d.odEixo != null) $('[data-r="odEixo"]').value = String(Math.round(d.odEixo));
             if (d.oeEixo != null) $('[data-r="oeEixo"]').value = String(Math.round(d.oeEixo));
 

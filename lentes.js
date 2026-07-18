@@ -2,13 +2,18 @@
    ESCOLHER LENTES — regras da ótica + catálogo real da loja
 
    As REGRAS são da Maxilook. Cada faixa diz que grau o laboratório atende
-   pronto e quais lentes servem naquela faixa, por tratamento escolhido.
+   pronto e quais lentes servem, por tratamento escolhido.
 
-   Faixa 1  esf +4,00 a -4,00 · cil até 2,00      → 4 lentes (1.56 comum)
-   Faixa 2  esf +4,00 a -4,00 · cil 2,25 a 4,00   → 2 lentes (para astigmatismo)
+   ORDEM IMPORTA: vale a PRIMEIRA faixa em que o grau couber (esférico E
+   cilíndrico). Por isso a resina padrão vem antes do policarbonato — quem
+   cabe na 1.56 leva a mais em conta; o poli entra quando o grau passa de 4.
 
-   Fora das faixas, multifocal, ou tratamento que não existe naquela faixa:
-   não indicamos nada. A ótica monta sob medida e chama no WhatsApp.
+   1  padrão         esf ±4,00 · cil até 2,00   resina 1.56
+   2  astigmatismo   esf ±4,00 · cil até 4,00   resina p/ astigmatismo
+   3  policarbonato  esf ±5,00 · cil até 2,00   policarbonato 1.59
+
+   Fora de todas, multifocal, ou tratamento que não existe na faixa:
+   não indicamos. A ótica monta sob medida e chama no WhatsApp.
    Melhor não vender do que vender errado.
 
    Preço, foto e variantId vêm da API da Nuvemshop (gera_lentes.py).
@@ -81,26 +86,34 @@ const LENTES = [
     img: 'https://acdn-us.mitiendanube.com/stores/007/085/367/products/b2469a1ba286035bdb983625ed0c6a28-7594fd160dcc83d13917665863090289-1024-1024.png' },
 ];
 
-/* As faixas da ótica, da menor para a maior cilíndrico.
-   Para adicionar uma faixa nova, é só acrescentar aqui — nada mais muda. */
 const FAIXAS = [
   {
-    nome: 'padrão',
-    esfMin: -4.00, esfMax: 4.00, cilMax: 2.00,
+    nome: 'padrão', material: 'resina 1.56',
+    esfMax: 4.00, cilMax: 2.00,
     lentes: {
-      antirreflexo:       '316444407',  // Básicas 1.56 c/ Antirreflexo      R$ 129
+      antirreflexo:       '316444407',  // Básicas 1.56 c/ AR                R$ 129
       blue:               '314902019',  // Básicas 1.56 AR + Anti Blue       R$ 199
       fotocromatica:      '332987251',  // Fotocromáticas c/ AR              R$ 249
       fotocromatica_blue: '339075492',  // Fotocromáticas Anti Blue c/ AR    R$ 459
     }
   },
   {
-    nome: 'astigmatismo',
-    esfMin: -4.00, esfMax: 4.00, cilMax: 4.00,
+    nome: 'astigmatismo', material: 'resina para astigmatismo',
+    esfMax: 4.00, cilMax: 4.00,
     lentes: {
       antirreflexo:       '337827069',  // AR Para Astigmatismo              R$ 199
       blue:               '339014487',  // Anti Blue AR Para Astigmatismo    R$ 279
-      // fotocromática não existe nesta faixa → cai para a ótica
+      // fotocromática não existe nesta faixa
+    }
+  },
+  {
+    nome: 'policarbonato', material: 'policarbonato 1.59',
+    esfMax: 5.00, cilMax: 2.00,
+    lentes: {
+      antirreflexo:       '314902090',  // Poli 1.59 c/ AR                   R$ 229
+      blue:               '314902030',  // Poli 1.59 AR + Anti Blue          R$ 269
+      fotocromatica_blue: '332085529',  // Poli 1.59 Fotossensível AR+Blue   R$ 599
+      // fotocromática sem anti blue não existe em policarbonato
     }
   },
 ];
@@ -113,18 +126,20 @@ const FAIXAS = [
 /** Pior olho: maior módulo, preservando o sinal. */
 function piorOlho(a, b) { return Math.abs(a) >= Math.abs(b) ? a : b; }
 
-/** Lê o grau dos dois olhos. Sem receita (descanso) = zerado. */
+/** Grau dos dois olhos, já em módulo. Sem receita (descanso) = zerado. */
 function grau(receita) {
   if (!receita) return { esf: 0, cil: 0 };
   return {
-    esf: piorOlho(Number(receita.odEsf) || 0, Number(receita.oeEsf) || 0),
+    esf: Math.abs(piorOlho(Number(receita.odEsf) || 0, Number(receita.oeEsf) || 0)),
     cil: Math.max(Math.abs(Number(receita.odCil) || 0), Math.abs(Number(receita.oeCil) || 0))
   };
 }
 
+const cabe = (g, f) => g.esf <= f.esfMax && g.cil <= f.cilMax;
+
 /**
  * @param {{visao:string, trat:string, receita:object|null}} e
- * @returns {{lente, porque, temAstig, faixa}}                    indicação
+ * @returns {{lente, porque, temAstig, faixa}}                      indicação
  *        | {fora:'multifocal'|'esferico'|'cilindrico'|'tratamento'}  → ótica
  */
 function recomendar(e) {
@@ -133,16 +148,19 @@ function recomendar(e) {
 
   const g = grau(e.receita);
 
-  // Faixas estão em ordem crescente de cilíndrico: a primeira que couber vence.
-  const faixa = FAIXAS.find(f => g.cil <= f.cilMax);
-  if (!faixa) return { fora: 'cilindrico', valor: g.cil };
-
-  if (g.esf < faixa.esfMin || g.esf > faixa.esfMax)
-    return { fora: 'esferico', valor: g.esf };
+  // Primeira faixa que couber no esférico E no cilíndrico.
+  const faixa = FAIXAS.find(f => cabe(g, f));
+  if (!faixa) {
+    // Nenhuma serve: explica qual dos dois estourou. Se existe faixa que
+    // aceita esse cilíndrico, então o problema é o esférico.
+    const cilOk = FAIXAS.some(f => g.cil <= f.cilMax);
+    return cilOk ? { fora: 'esferico', valor: g.esf }
+                 : { fora: 'cilindrico', valor: g.cil };
+  }
 
   const id = faixa.lentes[e.trat];
-  // O tratamento pedido pode não existir naquela faixa (ex.: fotocromática
-  // com astigmatismo alto). Isso é falta de produto, não grau fora.
+  // O tratamento pode não existir na faixa (ex.: fotocromática com
+  // astigmatismo alto). É falta de produto pronto, não grau fora.
   if (!id) return { fora: 'tratamento', faixa: faixa.nome };
 
   const lente = LENTES.find(l => l.id === id);

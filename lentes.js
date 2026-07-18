@@ -5,13 +5,19 @@
    pronto e quais lentes servem, por tratamento escolhido.
 
    ORDEM IMPORTA: vale a PRIMEIRA faixa em que o grau couber (esférico E
-   cilíndrico). Por isso a resina padrão vem antes do policarbonato — quem
-   cabe na 1.56 leva a mais em conta; o poli entra quando o grau passa de 4.
+   cilíndrico). Por isso as faixas vão da mais barata/comum para a mais
+   especial — quem cabe na 1.56 não paga policarbonato nem 1.67.
 
-   1  padrão         esf ±4,00 · cil até 2,00   resina 1.56
-   2  astigmatismo   esf ±4,00 · cil até 4,00   resina p/ astigmatismo
-   3  policarbonato  esf ±5,00 · cil até 2,00   policarbonato 1.59
-   4  poli astig.    esf ±5,00 · cil até 4,00   policarbonato p/ astigmatismo
+     #  faixa               esférico          cilíndrico   material
+     1  padrão              -4,00 a +4,00     até 2,00     resina 1.56
+     2  astigmatismo        -4,00 a +4,00     até 4,00     resina p/ astig.
+     3  policarbonato       -5,00 a +5,00     até 2,00     policarbonato 1.59
+     4  poli astigmatismo   -5,00 a +5,00     até 4,00     poli p/ astig.
+     5  finas               -8,00 a +6,00     até 2,00     resina 1.67
+     6  super finas        -12,00 a +6,00     até 2,00     resina 1.74
+
+   ATENÇÃO: as faixas 5 e 6 são ASSIMÉTRICAS (vão mais fundo no negativo que
+   no positivo), por isso o limite é com sinal — não dá para usar módulo.
 
    Fora de todas, multifocal, ou tratamento que não existe na faixa:
    não indicamos. A ótica monta sob medida e chama no WhatsApp.
@@ -90,7 +96,7 @@ const LENTES = [
 const FAIXAS = [
   {
     nome: 'padrão', material: 'resina 1.56',
-    esfMax: 4.00, cilMax: 2.00,
+    esfMin: -4.00, esfMax: 4.00, cilMax: 2.00,
     lentes: {
       antirreflexo:       '316444407',  // Básicas 1.56 c/ AR                R$ 129
       blue:               '314902019',  // Básicas 1.56 AR + Anti Blue       R$ 199
@@ -100,30 +106,43 @@ const FAIXAS = [
   },
   {
     nome: 'astigmatismo', material: 'resina para astigmatismo',
-    esfMax: 4.00, cilMax: 4.00,
+    esfMin: -4.00, esfMax: 4.00, cilMax: 4.00,
     lentes: {
       antirreflexo:       '337827069',  // AR Para Astigmatismo              R$ 199
       blue:               '339014487',  // Anti Blue AR Para Astigmatismo    R$ 279
-      // fotocromática não existe nesta faixa
     }
   },
   {
     nome: 'policarbonato', material: 'policarbonato 1.59',
-    esfMax: 5.00, cilMax: 2.00,
+    esfMin: -5.00, esfMax: 5.00, cilMax: 2.00,
     lentes: {
       antirreflexo:       '314902090',  // Poli 1.59 c/ AR                   R$ 229
       blue:               '314902030',  // Poli 1.59 AR + Anti Blue          R$ 269
       fotocromatica_blue: '332085529',  // Poli 1.59 Fotossensível AR+Blue   R$ 599
-      // fotocromática sem anti blue não existe em policarbonato
     }
   },
   {
     nome: 'policarbonato astigmatismo', material: 'policarbonato para astigmatismo',
-    esfMax: 5.00, cilMax: 4.00,
+    esfMin: -5.00, esfMax: 5.00, cilMax: 4.00,
     lentes: {
-      antirreflexo: '339012891',  // Poli c/ AR Para Astigmatismo        R$ 379
-      blue:         '339013853',  // Poli Anti Blue AR Para Astigmatismo R$ 499
-      // fotocromática não existe nesta faixa
+      antirreflexo: '339012891',  // Poli c/ AR Para Astigmatismo            R$ 379
+      blue:         '339013853',  // Poli Anti Blue AR Para Astigmatismo     R$ 499
+    }
+  },
+  {
+    nome: 'finas', material: 'resina 1.67',
+    esfMin: -8.00, esfMax: 6.00, cilMax: 2.00,
+    lentes: {
+      antirreflexo: '314902033',  // Finas 1.67 c/ AR                        R$ 499
+      blue:         '314902038',  // Finas 1.67 AR + Anti Blue               R$ 599
+    }
+  },
+  {
+    nome: 'super finas', material: 'resina 1.74',
+    esfMin: -12.00, esfMax: 6.00, cilMax: 2.00,
+    lentes: {
+      antirreflexo: '314902042',  // Super Finas 1.74 c/ AR                  R$ 999
+      blue:         '314902045',  // Super Finas 1.74 AR + Anti Blue         R$ 1399
     }
   },
 ];
@@ -133,19 +152,19 @@ const FAIXAS = [
    índice nem espessura — isso é do laboratório.
 -------------------------------------------------------------------------- */
 
-/** Pior olho: maior módulo, preservando o sinal. */
+/** Pior olho: maior módulo, PRESERVANDO o sinal (as faixas são assimétricas). */
 function piorOlho(a, b) { return Math.abs(a) >= Math.abs(b) ? a : b; }
 
-/** Grau dos dois olhos, já em módulo. Sem receita (descanso) = zerado. */
+/** Esférico com sinal, cilíndrico em módulo. Sem receita = zerado. */
 function grau(receita) {
   if (!receita) return { esf: 0, cil: 0 };
   return {
-    esf: Math.abs(piorOlho(Number(receita.odEsf) || 0, Number(receita.oeEsf) || 0)),
+    esf: piorOlho(Number(receita.odEsf) || 0, Number(receita.oeEsf) || 0),
     cil: Math.max(Math.abs(Number(receita.odCil) || 0), Math.abs(Number(receita.oeCil) || 0))
   };
 }
 
-const cabe = (g, f) => g.esf <= f.esfMax && g.cil <= f.cilMax;
+const cabe = (g, f) => g.esf >= f.esfMin && g.esf <= f.esfMax && g.cil <= f.cilMax;
 
 /**
  * @param {{visao:string, trat:string, receita:object|null}} e
@@ -161,11 +180,11 @@ function recomendar(e) {
   // Primeira faixa que couber no esférico E no cilíndrico.
   const faixa = FAIXAS.find(f => cabe(g, f));
   if (!faixa) {
-    // Nenhuma serve: explica qual dos dois estourou. Se existe faixa que
-    // aceita esse cilíndrico, então o problema é o esférico.
-    const cilOk = FAIXAS.some(f => g.cil <= f.cilMax);
-    return cilOk ? { fora: 'esferico', valor: g.esf }
-                 : { fora: 'cilindrico', valor: g.cil };
+    // Explica qual dos dois estourou: se alguma faixa aceita esse esférico,
+    // então quem está fora é o cilíndrico.
+    const esfOk = FAIXAS.some(f => g.esf >= f.esfMin && g.esf <= f.esfMax);
+    return esfOk ? { fora: 'cilindrico', valor: g.cil }
+                 : { fora: 'esferico', valor: g.esf };
   }
 
   const id = faixa.lentes[e.trat];

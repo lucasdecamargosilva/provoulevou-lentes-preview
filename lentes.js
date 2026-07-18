@@ -11,6 +11,7 @@
    1  padrão         esf ±4,00 · cil até 2,00   resina 1.56
    2  astigmatismo   esf ±4,00 · cil até 4,00   resina p/ astigmatismo
    3  policarbonato  esf ±5,00 · cil até 2,00   policarbonato 1.59
+   4  poli astig.    esf ±5,00 · cil até 4,00   policarbonato p/ astigmatismo
 
    Fora de todas, multifocal, ou tratamento que não existe na faixa:
    não indicamos. A ótica monta sob medida e chama no WhatsApp.
@@ -114,6 +115,15 @@ const FAIXAS = [
       blue:               '314902030',  // Poli 1.59 AR + Anti Blue          R$ 269
       fotocromatica_blue: '332085529',  // Poli 1.59 Fotossensível AR+Blue   R$ 599
       // fotocromática sem anti blue não existe em policarbonato
+    }
+  },
+  {
+    nome: 'policarbonato astigmatismo', material: 'policarbonato para astigmatismo',
+    esfMax: 5.00, cilMax: 4.00,
+    lentes: {
+      antirreflexo: '339012891',  // Poli c/ AR Para Astigmatismo        R$ 379
+      blue:         '339013853',  // Poli Anti Blue AR Para Astigmatismo R$ 499
+      // fotocromática não existe nesta faixa
     }
   },
 ];

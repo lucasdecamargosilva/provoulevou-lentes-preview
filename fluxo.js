@@ -101,7 +101,8 @@
         antirreflexo: 'Antirreflexo',
         blue: 'Antirreflexo + luz azul',
         fotocromatica: 'Fotocromática',
-        fotocromatica_blue: 'Fotocromática + luz azul'
+        fotocromatica_blue: 'Fotocromática + luz azul',
+        nenhum: 'Sem tratamento'
     };
 
     /* Grau fora da faixa da ótica: explica em português, sem número técnico solto. */

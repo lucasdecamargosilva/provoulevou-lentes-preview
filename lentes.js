@@ -102,6 +102,7 @@ const FAIXAS = [
     visao: 'simples',
     esfMin: -4.00, esfMax: 4.00, cilMax: 2.00,
     lentes: {
+      nenhum:             '314902021',  // Básicas 1.49 Simples              R$ 99
       antirreflexo:       '316444407',  // Básicas 1.56 c/ AR                R$ 129
       blue:               '314902019',  // Básicas 1.56 AR + Anti Blue       R$ 199
       fotocromatica:      '332987251',  // Fotocromáticas c/ AR              R$ 249
@@ -122,6 +123,7 @@ const FAIXAS = [
     visao: 'simples',
     esfMin: -5.00, esfMax: 5.00, cilMax: 2.00,
     lentes: {
+      nenhum:             '314902025',  // Poli 1.59 Incolor                 R$ 129
       antirreflexo:       '314902090',  // Poli 1.59 c/ AR                   R$ 229
       blue:               '314902030',  // Poli 1.59 AR + Anti Blue          R$ 269
       fotocromatica_blue: '332085529',  // Poli 1.59 Fotossensível AR+Blue   R$ 599
@@ -159,6 +161,7 @@ const FAIXAS = [
     visao: 'multifocal',
     esfMin: -4.00, esfMax: 4.00, cilMax: 4.00,
     lentes: {
+      nenhum:       '314902055',  // Básicas Multifocais 1.49               R$ 359
       antirreflexo: '314902058',  // Multifocais c/ Antirreflexo            R$ 429
       blue:         '314902067',  // Multifocais AR + Filtro de Luz Azul    R$ 599
       // fotocromática multifocal nao existe no catalogo
@@ -224,6 +227,7 @@ function porque(trat, g) {
   const p = [];
   if (trat === 'fotocromatica' || trat === 'fotocromatica_blue')
     p.push('escurece no sol e clareia dentro de casa');
+  else if (trat === 'nenhum') p.push('sem tratamento, a opção mais em conta');
   else p.push('com antirreflexo');
   if (trat === 'blue' || trat === 'fotocromatica_blue')
     p.push('filtra a luz azul das telas');

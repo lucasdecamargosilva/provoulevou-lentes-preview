@@ -134,11 +134,13 @@
         } else {
             st.lente = rec.lente;
             pintarCard(rec.lente, rec.porque);
-            // Cacife: a solar tem 5 cores no mesmo preco - mostra pra escolher
+            // Cacife: a solar tem 5 cores no mesmo preco - mostra com foto pra escolher
             $('#q-alternativas').innerHTML = (rec.outras || []).length
                 ? '<div class="q-alt-titulo">Outras opcoes no mesmo tratamento</div>'
                   + rec.outras.map(l => '<button type="button" class="q-opt q-opt-alt" data-alt="' + l.id + '">'
-                      + '<span class="q-opt-t">' + l.nome + '</span><span class="q-opt-s">' + brl(l.preco) + '</span></button>').join('')
+                      + (l.img ? '<img class="q-opt-alt-foto" src="' + l.img + '" alt="" loading="lazy">' : '')
+                      + '<span class="q-opt-alt-txt"><span class="q-opt-t">' + l.nome + '</span>'
+                      + '<span class="q-opt-s">' + brl(l.preco) + '</span></span></button>').join('')
                 : '';
             $('#q-alternativas').querySelectorAll('[data-alt]').forEach(b => b.onclick = () => {
                 const l = window.LENTES.find(x => x.id === b.dataset.alt);

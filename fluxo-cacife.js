@@ -332,5 +332,5 @@
 
     popular();
     montarResultado();
-    ir('q-step-result');
+    ir('q-step-lentes');
 })();

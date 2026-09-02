@@ -35,8 +35,7 @@ const LENTES = [
   "neg": -4.0,
   "pos": 4.0,
   "cil": -2.0,
-  "add": null,
-  "_cil_assumido": true
+  "add": null
  },
  {
   "id": "364708640",
@@ -162,8 +161,7 @@ const LENTES = [
   "neg": -6.0,
   "pos": 6.0,
   "cil": -2.0,
-  "add": null,
-  "_cil_assumido": true
+  "add": null
  },
  {
   "id": "364698734",
@@ -199,8 +197,7 @@ const LENTES = [
   "neg": -4.0,
   "pos": 4.0,
   "cil": -2.0,
-  "add": null,
-  "_cil_assumido": true
+  "add": null
  },
  {
   "id": "364704479",
@@ -218,8 +215,7 @@ const LENTES = [
   "neg": -6.0,
   "pos": 6.0,
   "cil": -2.0,
-  "add": null,
-  "_cil_assumido": true
+  "add": null
  },
  {
   "id": "364707051",
@@ -237,8 +233,7 @@ const LENTES = [
   "neg": -6.0,
   "pos": 4.0,
   "cil": -2.0,
-  "add": null,
-  "_cil_assumido": true
+  "add": null
  },
  {
   "id": "364701592",
@@ -256,9 +251,7 @@ const LENTES = [
   "neg": -3.0,
   "pos": 2.0,
   "cil": -2.0,
-  "add": 3.5,
-  "_cil_assumido": true,
-  "_add_assumido": true
+  "add": 3.0
  },
  {
   "id": "364710682",
@@ -276,8 +269,7 @@ const LENTES = [
   "neg": -6.0,
   "pos": 4.0,
   "cil": -2.0,
-  "add": null,
-  "_cil_assumido": true
+  "add": null
  },
  {
   "id": "364696398",
@@ -295,9 +287,7 @@ const LENTES = [
   "neg": -3.0,
   "pos": 2.0,
   "cil": -2.0,
-  "add": 3.5,
-  "_cil_assumido": true,
-  "_add_assumido": true
+  "add": 3.0
  },
  {
   "id": "364694895",
@@ -315,9 +305,7 @@ const LENTES = [
   "neg": -3.0,
   "pos": 2.0,
   "cil": -2.0,
-  "add": 3.5,
-  "_cil_assumido": true,
-  "_add_assumido": true
+  "add": 2.0
  }
 ];
 
